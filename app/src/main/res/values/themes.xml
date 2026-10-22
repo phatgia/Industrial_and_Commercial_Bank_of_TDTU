@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Industrial_and_Commercial_Bank_of_TDTU" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.Industrial_and_Commercial_Bank_of_TDTU" parent="Base.Theme.Industrial_and_Commercial_Bank_of_TDTU" />
+</resources>
