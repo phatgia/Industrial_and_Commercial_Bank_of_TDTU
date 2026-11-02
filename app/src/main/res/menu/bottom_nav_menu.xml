@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/home_24px"
+        android:title="Trang chủ" />
+
+    <item
+        android:id="@+id/nav_account"
+        android:icon="@drawable/wallet_24px"
+        android:title="Tài khoản" />
+
+    <!-- Item trống ở giữa làm khoảng trống cho nút FAB -->
+    <item
+        android:id="@+id/nav_placeholder"
+        android:title=""
+        android:enabled="false" />
+
+    <item
+        android:id="@+id/nav_utilities"
+        android:icon="@drawable/apartment_24px"
+        android:title="Tiện ích" />
+
+    <item
+        android:id="@+id/nav_ai"
+        android:icon="@drawable/chat_bubble_24px"
+        android:title="Nova AI" />
+</menu>
