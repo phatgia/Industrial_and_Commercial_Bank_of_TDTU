@@ -365,6 +365,7 @@
             android:orientation="vertical">
 
             <ImageView
+                android:id="@+id/btnBillMenu"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
                 android:src="@drawable/receipt"
