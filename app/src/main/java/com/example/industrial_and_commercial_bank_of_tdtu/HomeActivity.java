@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,9 @@ public class HomeActivity extends AppCompatActivity {
     public static int CODE_STATUS_UTILITY=1000;
     public static int CODE_STATUS_PROFILE=1001;
     LinearLayout navUtility, navProfile;
+
+    TextView txtTransHis;
+    public static int CODE_STATUS_TRANS=1002;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +54,15 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent chuyen_man_hinh_profile = new Intent(HomeActivity.this, ProfileActivity.class);
                 startActivityForResult(chuyen_man_hinh_profile, CODE_STATUS_PROFILE);
+            }
+        });
+
+        txtTransHis = findViewById(R.id.txtTransHis);
+        txtTransHis.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent chuyen_man_hinh_profile = new Intent(HomeActivity.this, TransactionHistoryActivity.class);
+                startActivityForResult(chuyen_man_hinh_profile, CODE_STATUS_TRANS);
             }
         });
 
