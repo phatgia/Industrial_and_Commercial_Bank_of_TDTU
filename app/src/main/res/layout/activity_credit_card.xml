@@ -266,7 +266,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_weight="3"
+                    android:layout_weight="2.3"
                     android:layout_marginEnd="5dp"
                     android:background="@drawable/bg_btn1"
                     android:padding="10dp"
@@ -342,7 +342,9 @@
                     android:text="Nạp tiền"
                     android:textColor="#006400"
                     app:backgroundTint="@color/white"
-                    app:icon="@drawable/add_2"/>
+                    app:icon="@drawable/add_2"
+                    app:iconTint = "#006400"
+                    app:iconGravity= "textStart"/>
 
                 <Button
                     android:layout_width="wrap_content"
@@ -353,7 +355,9 @@
                     android:text="Rút tiền"
                     android:textColor="#006400"
                     app:backgroundTint="@color/white"
-                    app:icon="@drawable/add_2"/>
+                    app:icon="@drawable/arrow_forward_24px"
+                    app:iconTint = "#006400"
+                    app:iconGravity= "textStart"/>
 
 
             </LinearLayout>
@@ -366,7 +370,9 @@
                 android:textColor="#006400"
                 app:backgroundTint="@color/white"
                 android:background="@drawable/bg_btn1"
-                app:icon="@drawable/add_2"
+                app:icon = "@drawable/sync_alt"
+                app:iconTint = "#006400"
+                app:iconGravity= "textStart"
                 />
 
             <LinearLayout
@@ -400,8 +406,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Thêm thẻ"
+                    android:textSize="10sp"
                     android:textColor="#006400"
                     android:backgroundTint="@color/white"
+                    app:icon = "@drawable/add_2"
+                    app:iconTint = "#006400"
+                    app:iconGravity= "textStart"
+                    app:iconSize= "10dp"
                     />
             </LinearLayout>
 
@@ -409,10 +420,161 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="@drawable/bg_btn"
-                android:layout_marginTop="20dp">
+                android:background="@drawable/bg_credircard"
+                android:layout_marginTop="20dp"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="10"
+                    >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ICBTDTU"
+                        android:textColor="@color/white"
+                        android:textStyle="bold"
+                        android:layout_weight="5"/>
+
+                </LinearLayout>
 
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PLATINUM DEBIT"
+                    android:textColor="@color/material_dynamic_neutral_variant70"
+                    android:textSize="10sp"
+                    android:layout_marginTop="10dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="••••   ••••   ••••   2846"
+                    android:textSize="25sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="10dp"/>
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="10">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="3"
+                        android:layout_marginEnd="10dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CHỦ THẺ"
+                            android:textSize = "10sp"
+                            android:textColor="@color/material_dynamic_neutral_variant70"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TRAN GIA PHAT"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="2">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="HIỆU LỰC"
+                            android:textSize = "10sp"
+                            android:textColor="@color/material_dynamic_neutral_variant70"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="08/29"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"/>
+
+                    </LinearLayout>
+
+                    <!--Icon-->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="5">
+
+
+
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:weightSum="9"
+                >
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Khóa thẻ"
+                    app:icon = "@drawable/lock"
+                    app:iconTint = "#3333FF"
+                    android:textColor="#3333FF"
+                    android:background="@drawable/bg_btn1"
+                    app:iconGravity = "textTop"
+                    app:backgroundTint = "@color/white"
+                    android:layout_weight="3"
+                    android:layout_marginEnd="10dp"
+                    android:textSize="10sp"
+                    />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hạn mức"
+                    app:icon = "@drawable/schedule"
+                    app:iconTint = "#3333FF"
+                    android:textColor="#3333FF"
+                    android:background="@drawable/bg_btn1"
+                    app:iconGravity = "textTop"
+                    app:backgroundTint = "@color/white"
+                    android:layout_weight="3"
+                    android:layout_marginEnd="10dp"
+                    android:textSize="10sp"
+                    />
+
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Xem thông tin"
+                    android:textSize="10sp"
+                    app:icon = "@drawable/visibility_24px"
+                    app:iconTint = "#3333FF"
+                    android:textColor="#3333FF"
+                    android:background="@drawable/bg_btn1"
+                    app:iconGravity = "textTop"
+                    app:backgroundTint = "@color/white"
+                    android:layout_weight="3"
+                    />
 
 
 
