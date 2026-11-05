@@ -3,39 +3,65 @@ package com.example.industrial_and_commercial_bank_of_tdtu;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class HomeActivity extends AppCompatActivity {
 
-    ImageButton btnUtility;
-    public static int CODE_STATUS_UTILITY=1000;
-    public static int CODE_STATUS_PROFILE=1001;
-    LinearLayout navUtility, navProfile;
-
+    ImageButton btnUtility, btnMap, imgProfile, imgNext, btnTranferOut, btnTranferIn, btnCenter;
+    LinearLayout navUtility, navProfile, navAI;
     TextView txtTransHis;
-    public static int CODE_STATUS_TRANS=1002;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        btnUtility = findViewById(R.id.btnBill);
+        imgProfile = findViewById(R.id.imgProfile);
+        imgProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent chuyen_man_hinh_profile = new Intent(HomeActivity.this, ProfileActivity.class);
+                startActivity(chuyen_man_hinh_profile);
+            }
+        });
 
+        imgNext = findViewById(R.id.imgNext);
+        imgNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, CreditCardActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnTranferOut = findViewById(R.id.btnTranferOut);
+        btnTranferOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, CreditCardActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnTranferIn = findViewById(R.id.btnTranferIn);
+        btnTranferIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, CreditCardActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnUtility = findViewById(R.id.btnBill);
         btnUtility.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent chuyen_man_hinh_utilities = new Intent(HomeActivity.this, UtilitiesActivity.class);
-                startActivityForResult(chuyen_man_hinh_utilities, CODE_STATUS_UTILITY);
+                startActivity(chuyen_man_hinh_utilities);
             }
         });
 
@@ -44,7 +70,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent chuyen_man_hinh_utilities = new Intent(HomeActivity.this, UtilitiesActivity.class);
-                startActivityForResult(chuyen_man_hinh_utilities, CODE_STATUS_UTILITY);
+                startActivity(chuyen_man_hinh_utilities);
             }
         });
 
@@ -53,7 +79,16 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent chuyen_man_hinh_profile = new Intent(HomeActivity.this, ProfileActivity.class);
-                startActivityForResult(chuyen_man_hinh_profile, CODE_STATUS_PROFILE);
+                startActivity(chuyen_man_hinh_profile);
+            }
+        });
+
+        navAI = findViewById(R.id.navAI);
+        navAI.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, ChatBotActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -62,9 +97,26 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent chuyen_man_hinh_profile = new Intent(HomeActivity.this, TransactionHistoryActivity.class);
-                startActivityForResult(chuyen_man_hinh_profile, CODE_STATUS_TRANS);
+                startActivity(chuyen_man_hinh_profile);
             }
         });
 
+        btnMap = findViewById(R.id.btnLocation);
+        btnMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, ChatBotActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnCenter = findViewById(R.id.btnCenter);
+        btnCenter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, TransactionHistoryActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
