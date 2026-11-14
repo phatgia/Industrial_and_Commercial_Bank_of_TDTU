@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
 
         setupBottomNavListeners();
 
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                syncNavWithCurrentFragment();
+            }
+        });
+
         if (savedInstanceState == null) {
             loadFragment(new LoginFragment(), false);
         }
@@ -62,12 +70,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadFragment(Fragment fragment, boolean addToBackStack) {
+        if (!addToBackStack) {
+            getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
         androidx.fragment.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment);
         if (addToBackStack) {
             ft.addToBackStack(null);
         }
         ft.commit();
+    }
+
+    private void syncNavWithCurrentFragment() {
+        Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (current instanceof HomeFragment) {
+            updateNavUI(0);
+        } else if (current instanceof ProfileFragment) {
+            updateNavUI(1);
+        } else if (current instanceof UtilitiesFragment) {
+            updateNavUI(2);
+        } else if (current instanceof ChatBotFragment) {
+            updateNavUI(3);
+        }
     }
 
     private void setupBottomNavListeners() {
