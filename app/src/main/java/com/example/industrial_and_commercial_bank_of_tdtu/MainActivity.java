@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager;
+
 public class MainActivity extends AppCompatActivity {
 
     private LinearLayout bottomNav;
@@ -147,5 +149,14 @@ public class MainActivity extends AppCompatActivity {
 
         imgNavAI.setImageTintList(ColorStateList.valueOf(selectedTab == 3 ? activeColor : inactiveColor));
         txtNavAI.setTextColor(selectedTab == 3 ? activeColor : inactiveColor);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Xoa phien dang nhap khi thoat app (khong xoa neu chi xoay man hinh)
+        if (!isChangingConfigurations()) {
+            new SessionManager().clear();
+        }
     }
 }
