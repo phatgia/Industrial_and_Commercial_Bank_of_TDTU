@@ -1,10 +1,16 @@
 package com.example.industrial_and_commercial_bank_of_tdtu;
 
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -87,24 +93,10 @@ public class HomeFragment extends Fragment {
         });
 
         btnTranferOut = view.findViewById(R.id.btnTranferOut);
-        btnTranferOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mainActivity != null) {
-                    mainActivity.loadFragment(new CreditCardFragment(), true);
-                }
-            }
-        });
+        btnTranferOut.setOnClickListener(v -> showTransferDialog());
 
         btnTranferIn = view.findViewById(R.id.btnTranferIn);
-        btnTranferIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mainActivity != null) {
-                    mainActivity.loadFragment(new CreditCardFragment(), true);
-                }
-            }
-        });
+        btnTranferIn.setOnClickListener(v -> showDepositDialog());
 
         btnUtility = view.findViewById(R.id.btnBill);
         btnUtility.setOnClickListener(new View.OnClickListener() {
@@ -195,5 +187,51 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireContext(), "Không tải được lịch sử giao dịch.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showTransferDialog() {
+        if (getContext() == null) return;
+        Dialog dialog = new Dialog(getContext());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_transfer);
+        
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        }
+
+        Button btnConfirm = dialog.findViewById(R.id.btnConfirm);
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnConfirm.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "Yêu cầu chuyển tiền đang xử lý", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void showDepositDialog() {
+        if (getContext() == null) return;
+        Dialog dialog = new Dialog(getContext());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_deposit);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        }
+
+        Button btnConfirm = dialog.findViewById(R.id.btnConfirm);
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        btnConfirm.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "Yêu cầu nạp tiền đang xử lý", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 }
