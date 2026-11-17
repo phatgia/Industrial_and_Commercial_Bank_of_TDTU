@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_card_white">
+
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tiêu đề"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#1E293B"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etInput1"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Nhập thông tin"
+        android:background="@drawable/bg_input_rounded"
+        android:paddingHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:textSize="14sp"/>
+
+    <EditText
+        android:id="@+id/etInput2"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Nhập thêm thông tin"
+        android:background="@drawable/bg_input_rounded"
+        android:paddingHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:textSize="14sp"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hủy"
+            android:backgroundTint="#F1F5F9"
+            android:textColor="#64748B"
+            android:layout_marginEnd="12dp"/>
+
+        <Button
+            android:id="@+id/btnConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xác nhận"
+            android:backgroundTint="#0F4C3A"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+
+</LinearLayout>
