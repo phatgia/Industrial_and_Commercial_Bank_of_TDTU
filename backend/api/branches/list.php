@@ -1,7 +1,7 @@
 <?php
 /**
  * GET /api/branches/list.php
- * Tra ve danh sach chi nhanh ngan hang cho tinh nang Ban do.
+ * Yeu cau Bearer Token. Tra ve danh sach chi nhanh ngan hang cho tinh nang Ban do.
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -9,6 +9,8 @@ require_once __DIR__ . '/../config/db.php';
 requireMethod('GET');
 
 $pdo = getDbConnection();
+requireAuth($pdo);
+
 $stmt = $pdo->query('SELECT id, branch_name, address, latitude, longitude, opening_hours FROM bank_branches ORDER BY id ASC');
 $branches = $stmt->fetchAll();
 

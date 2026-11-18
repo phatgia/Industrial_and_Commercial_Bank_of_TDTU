@@ -83,8 +83,9 @@ public class LoginFragment extends Fragment {
                 ApiResponse<LoginData> body = response.body();
                 if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
                     User user = body.getData().getUser();
-                    if (user != null) {
-                        sessionManager.saveUser(user);
+                    String token = body.getData().getToken();
+                    if (user != null && token != null && !token.isEmpty()) {
+                        sessionManager.saveSession(user, token);
                         navigateByRole(user.getRole(), user.getFullName());
                         return;
                     }

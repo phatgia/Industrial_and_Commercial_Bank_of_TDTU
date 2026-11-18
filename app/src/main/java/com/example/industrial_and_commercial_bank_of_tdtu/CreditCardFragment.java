@@ -106,10 +106,9 @@ public class CreditCardFragment extends Fragment {
     }
 
     private void loadAccountsData() {
-        int userId = sessionManager.getUserId();
-        if (userId <= 0) return;
+        if (!sessionManager.isLoggedIn()) return;
 
-        ApiClient.getService().getAccounts(userId).enqueue(new Callback<ApiResponse<AccountsData>>() {
+        ApiClient.getService().getAccounts().enqueue(new Callback<ApiResponse<AccountsData>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<AccountsData>> call, @NonNull Response<ApiResponse<AccountsData>> response) {
                 if (!isAdded()) return;

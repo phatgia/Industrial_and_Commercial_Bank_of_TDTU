@@ -6,30 +6,32 @@ Thu muc nay chua ma nguon Database MySQL (`database.sql`) va he thong REST API b
 
 ```text
 backend/
-├── database.sql                      # Schema 6 bang InnoDB + du lieu mau
+├── database.sql                      # Schema 7 bang InnoDB (co user_sessions) + du lieu mau
 └── api/
+    ├── .htaccess                     # Giu Authorization: Bearer <token> tren Apache
     ├── config/
-    │   ├── .htaccess                 # Chan truy cap truc tiep qua trinh duyet
+    │   ├── .htaccess                 # Chan truy cap truc tiep thu muc config/
     │   ├── config.example.php        # File mau cau hinh (an toan khi push GitHub)
     │   ├── config.php                # (Ignored boi .gitignore) Chua mat khau DB that
-    │   └── db.php                    # Ket noi PDO singleton & JSON helpers
-    ├── health.php                    # GET  /api/health.php
+    │   └── db.php                    # PDO connection, JSON helpers, requireAuth & requireOfficer
+    ├── health.php                    # GET  /api/health.php (cong khai)
     ├── auth/
-    │   └── login.php                 # POST /api/auth/login.php
+    │   ├── login.php                 # POST /api/auth/login.php (tra ve Bearer token)
+    │   └── logout.php                # POST /api/auth/logout.php (thu hoi token)
     ├── accounts/
-    │   └── list.php                  # GET  /api/accounts/list.php?user_id=...
+    │   └── list.php                  # GET  /api/accounts/list.php (Bearer)
     ├── transactions/
-    │   ├── history.php               # GET  /api/transactions/history.php?user_id=...
-    │   ├── transfer.php              # POST /api/transactions/transfer.php (OTP 2FA)
-    │   └── deposit_withdraw.php      # POST /api/transactions/deposit_withdraw.php
+    │   ├── history.php               # GET  /api/transactions/history.php (Bearer)
+    │   ├── transfer.php              # POST /api/transactions/transfer.php (Bearer + OTP 2FA)
+    │   └── deposit_withdraw.php      # POST /api/transactions/deposit_withdraw.php (Bearer)
     ├── utilities/
-    │   ├── bills.php                 # GET  /api/utilities/bills.php
-    │   └── pay.php                   # POST /api/utilities/pay.php
+    │   ├── bills.php                 # GET  /api/utilities/bills.php (Bearer)
+    │   └── pay.php                   # POST /api/utilities/pay.php (Bearer)
     ├── officer/
-    │   ├── customers.php             # GET/POST /api/officer/customers.php
-    │   └── update_policy.php         # POST /api/officer/update_policy.php
+    │   ├── customers.php             # GET/POST /api/officer/customers.php (Bearer + OFFICER)
+    │   └── update_policy.php         # POST /api/officer/update_policy.php (Bearer + OFFICER)
     └── branches/
-        └── list.php                  # GET  /api/branches/list.php
+        └── list.php                  # GET  /api/branches/list.php (Bearer)
 ```
 
 ## 2. Huong dan cai dat tren Hosting (DirectAdmin)

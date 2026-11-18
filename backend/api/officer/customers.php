@@ -1,12 +1,13 @@
 <?php
 /**
- * GET  /api/officer/customers.php             -> Danh sach khach hang
- * POST /api/officer/customers.php             -> Tao khach hang moi + tai khoan CHECKING/SAVING
+ * GET  /api/officer/customers.php  -> Danh sach khach hang (chi OFFICER)
+ * POST /api/officer/customers.php  -> Tao khach hang moi (chi OFFICER)
  */
 
 require_once __DIR__ . '/../config/db.php';
 
 $pdo = getDbConnection();
+$officer = requireOfficer($pdo);
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
@@ -32,22 +33,14 @@ if ($method === 'GET') {
 
 if ($method === 'POST') {
     $input = getRequestInput();
-    $officerId = (int)($input['officer_id'] ?? 0);
     $fullName = trim((string)($input['full_name'] ?? ''));
     $email = trim((string)($input['email'] ?? ''));
     $phone = trim((string)($input['phone'] ?? ''));
     $password = (string)($input['password'] ?? '123456');
     $initialBalance = max(0.0, (float)($input['initial_balance'] ?? 0));
 
-    if ($officerId <= 0 || $fullName === '' || $email === '' || $phone === '') {
+    if ($fullName === '' || $email === '' || $phone === '') {
         sendJson(false, 'Thieu thong tin tao khach hang.', null, 400);
-    }
-
-    $roleCheck = $pdo->prepare('SELECT role FROM users WHERE id = :id LIMIT 1');
-    $roleCheck->execute([':id' => $officerId]);
-    $officer = $roleCheck->fetch();
-    if (!$officer || $officer['role'] !== 'OFFICER') {
-        sendJson(false, 'Chi nhan vien ngan hang (OFFICER) moi co quyen tao tai khoan.', null, 403);
     }
 
     try {
@@ -97,6 +90,7 @@ if ($method === 'POST') {
             'customer_id' => $newUserId,
             'checking_account' => $checkingNo,
             'saving_account' => $savingNo,
+            'created_by_officer_id' => $officer['id'],
         ], 201);
     } catch (PDOException $e) {
         if ($pdo->inTransaction()) {

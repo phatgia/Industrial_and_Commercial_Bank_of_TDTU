@@ -1,16 +1,22 @@
 package com.example.industrial_and_commercial_bank_of_tdtu.network;
 
+import androidx.annotation.NonNull;
+
+import java.io.IOException;
+
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * Singleton cung cap Retrofit client ket noi toi PHP API tren hosting phatg.id.vn.
+ * Singleton cung cap Retrofit client va tu dong gan Bearer Token vao header moi request.
  */
 public final class ApiClient {
 
-    // Base URL phai ket thuc bang dau '/'
     public static final String BASE_URL = "https://phatg.id.vn/api/";
 
     private static volatile Retrofit retrofit;
@@ -25,7 +31,27 @@ public final class ApiClient {
                     HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
                     logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
+                    Interceptor authInterceptor = new Interceptor() {
+                        @NonNull
+                        @Override
+                        public Response intercept(@NonNull Chain chain) throws IOException {
+                            Request original = chain.request();
+                            if (original.header("Authorization") != null) {
+                                return chain.proceed(original);
+                            }
+                            String token = new SessionManager().getToken();
+                            if (token != null && !token.isEmpty()) {
+                                Request authenticated = original.newBuilder()
+                                        .header("Authorization", "Bearer " + token)
+                                        .build();
+                                return chain.proceed(authenticated);
+                            }
+                            return chain.proceed(original);
+                        }
+                    };
+
                     OkHttpClient client = new OkHttpClient.Builder()
+                            .addInterceptor(authInterceptor)
                             .addInterceptor(logging)
                             .build();
 

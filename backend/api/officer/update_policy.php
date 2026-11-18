@@ -1,30 +1,23 @@
 <?php
 /**
  * POST /api/officer/update_policy.php
- * Nhan vien ngan hang (OFFICER) cap nhat lai suat tiet kiem trong bank_policies.
- * Body: { "officer_id": 3, "saving_interest_rate": 6.2, "high_value_threshold": 10000000 }
+ * Chi nhan vien ngan hang (OFFICER) duoc cap nhat lai suat tiet kiem trong bank_policies.
  */
 
 require_once __DIR__ . '/../config/db.php';
 
 requireMethod('POST');
 
+$pdo = getDbConnection();
+$officer = requireOfficer($pdo);
+$officerId = (int)$officer['id'];
+
 $input = getRequestInput();
-$officerId = (int)($input['officer_id'] ?? 0);
 $savingRate = isset($input['saving_interest_rate']) ? (float)$input['saving_interest_rate'] : -1.0;
 $threshold = isset($input['high_value_threshold']) ? (float)$input['high_value_threshold'] : 10000000.0;
 
-if ($officerId <= 0 || $savingRate < 0 || $savingRate > 50) {
+if ($savingRate < 0 || $savingRate > 50) {
     sendJson(false, 'Thong tin cap nhat lai suat khong hop le.', null, 400);
-}
-
-$pdo = getDbConnection();
-
-$roleCheck = $pdo->prepare('SELECT role FROM users WHERE id = :id LIMIT 1');
-$roleCheck->execute([':id' => $officerId]);
-$officer = $roleCheck->fetch();
-if (!$officer || $officer['role'] !== 'OFFICER') {
-    sendJson(false, 'Chi nhan vien ngan hang (OFFICER) moi co quyen thay doi chinh sach.', null, 403);
 }
 
 try {

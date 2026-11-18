@@ -21,7 +21,7 @@ public class ManagerProfile extends AppCompatActivity {
             btnLogout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new SessionManager().clear();
+                    new SessionManager().logoutAndClear();
                     Intent intent = new Intent(ManagerProfile.this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);

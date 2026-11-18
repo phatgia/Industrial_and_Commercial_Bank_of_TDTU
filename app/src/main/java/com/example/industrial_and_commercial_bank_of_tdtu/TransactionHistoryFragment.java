@@ -75,10 +75,9 @@ public class TransactionHistoryFragment extends Fragment {
     }
 
     private void loadHistory() {
-        int userId = sessionManager.getUserId();
-        if (userId <= 0) return;
+        if (!sessionManager.isLoggedIn()) return;
 
-        ApiClient.getService().getTransactionHistory(userId, 50).enqueue(new Callback<ApiResponse<TransactionsData>>() {
+        ApiClient.getService().getTransactionHistory(50).enqueue(new Callback<ApiResponse<TransactionsData>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<TransactionsData>> call, @NonNull Response<ApiResponse<TransactionsData>> response) {
                 if (!isAdded()) return;

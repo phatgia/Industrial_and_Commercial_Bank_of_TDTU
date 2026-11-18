@@ -1,27 +1,19 @@
 <?php
 /**
  * POST /api/transactions/transfer.php
- * Xu ly chuyen tien noi bo / lien ngan hang qua 2 buoc (OTP 2FA + ACID Transaction).
- *
- * Buoc 1 (action = "request_otp"):
- *   Body: { "action": "request_otp", "user_id": 1, "to_account_number": "1900100002", "to_bank_name": "ICBT Bank", "amount": 500000, "description": "..." }
- * Buoc 2 (action = "confirm"):
- *   Body: { "action": "confirm", "user_id": 1, "tx_id": 10, "otp_code": "123456" }
+ * Yeu cau Bearer Token. Chuyen tien qua 2 buoc (OTP 2FA + ACID Transaction).
  */
 
 require_once __DIR__ . '/../config/db.php';
 
 requireMethod('POST');
 
+$pdo = getDbConnection();
+$authUser = requireAuth($pdo);
+$userId = (int)$authUser['id'];
+
 $input = getRequestInput();
 $action = trim((string)($input['action'] ?? 'request_otp'));
-$userId = (int)($input['user_id'] ?? 0);
-
-if ($userId <= 0) {
-    sendJson(false, 'Thieu user_id hop le.', null, 400);
-}
-
-$pdo = getDbConnection();
 
 if ($action === 'request_otp') {
     $toAccountNumber = trim((string)($input['to_account_number'] ?? ''));
@@ -53,13 +45,8 @@ if ($action === 'request_otp') {
     $threshold = $policy ? (float)$policy['high_value_threshold'] : 10000000.0;
     $requiredEkyc = ($amount >= $threshold) ? 1 : 0;
 
-    if ($requiredEkyc === 1) {
-        $userStmt = $pdo->prepare('SELECT ekyc_verified FROM users WHERE id = :uid LIMIT 1');
-        $userStmt->execute([':uid' => $userId]);
-        $u = $userStmt->fetch();
-        if (!$u || !(bool)$u['ekyc_verified']) {
-            sendJson(false, 'Giao dich gia tri cao (>= ' . number_format($threshold) . ' VND) yeu cau xac thuc eKYC truoc.', null, 403);
-        }
+    if ($requiredEkyc === 1 && !(bool)$authUser['ekyc_verified']) {
+        sendJson(false, 'Giao dich gia tri cao (>= ' . number_format($threshold) . ' VND) yeu cau xac thuc eKYC truoc.', null, 403);
     }
 
     $otpCode = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
@@ -80,7 +67,7 @@ if ($action === 'request_otp') {
 
     sendJson(true, 'Da tao ma OTP xac thuc 2FA.', [
         'tx_id' => (int)$pdo->lastInsertId(),
-        'otp_code' => $otpCode, // Tra ve phuc vu demo thong bao OTP tren app
+        'otp_code' => $otpCode,
         'required_ekyc' => (bool)$requiredEkyc,
     ]);
 }
@@ -126,11 +113,9 @@ if ($action === 'confirm') {
             sendJson(false, 'So du khong du tai thoi diem xac nhan.', null, 400);
         }
 
-        // Tru tien tai khoan nguon
         $pdo->prepare('UPDATE accounts SET balance = balance - :amt WHERE id = :acc_id')
             ->execute([':amt' => $amount, ':acc_id' => $tx['from_account_id']]);
 
-        // Neu chuyen noi bo ICBT Bank thi cong tien cho tai khoan dich
         if (strcasecmp((string)$tx['to_bank_name'], 'ICBT Bank') === 0) {
             $pdo->prepare('UPDATE accounts SET balance = balance + :amt WHERE account_number = :to_acc')
                 ->execute([':amt' => $amount, ':to_acc' => $tx['to_account_number']]);

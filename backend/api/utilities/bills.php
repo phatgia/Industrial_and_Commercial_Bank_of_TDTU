@@ -1,26 +1,23 @@
 <?php
 /**
- * GET /api/utilities/bills.php?user_id=1&service_type=ELECTRICITY&bill_code=EVN-TDTU-1126
- * Tra cuu hoa don tien ich (dien, nuoc, nap DT, ve...).
+ * GET /api/utilities/bills.php?service_type=ELECTRICITY&bill_code=EVN-TDTU-1126
+ * Yeu cau Bearer Token. Chi tra cuu hoa don thuoc ve user dang dang nhap.
  */
 
 require_once __DIR__ . '/../config/db.php';
 
 requireMethod('GET');
 
-$userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+$pdo = getDbConnection();
+$authUser = requireAuth($pdo);
+$userId = (int)$authUser['id'];
+
 $serviceType = strtoupper(trim((string)($_GET['service_type'] ?? '')));
 $billCode = trim((string)($_GET['bill_code'] ?? ''));
 
-$pdo = getDbConnection();
+$conditions = ['user_id = :uid'];
+$params = [':uid' => $userId];
 
-$conditions = [];
-$params = [];
-
-if ($userId > 0) {
-    $conditions[] = 'user_id = :uid';
-    $params[':uid'] = $userId;
-}
 if ($serviceType !== '') {
     $conditions[] = 'service_type = :stype';
     $params[':stype'] = $serviceType;
@@ -31,11 +28,9 @@ if ($billCode !== '') {
 }
 
 $sql = 'SELECT id, user_id, service_type, provider_name, bill_code, amount, is_paid, due_date, created_at
-        FROM utility_bills';
-if (!empty($conditions)) {
-    $sql .= ' WHERE ' . implode(' AND ', $conditions);
-}
-$sql .= ' ORDER BY is_paid ASC, due_date ASC';
+        FROM utility_bills
+        WHERE ' . implode(' AND ', $conditions) . '
+        ORDER BY is_paid ASC, due_date ASC';
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);

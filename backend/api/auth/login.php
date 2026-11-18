@@ -2,6 +2,7 @@
 /**
  * POST /api/auth/login.php
  * Nhan: { "identifier": "0901234567 hoac email", "password": "..." }
+ * Tra ve: { user, token, expires_in }
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -33,7 +34,6 @@ if (!$user) {
     sendJson(false, 'Tai khoan khong ton tai.', null, 401);
 }
 
-// Ho tro ca bcrypt (password_hash) va SHA-256 (du lieu seed tu database.sql)
 $storedHash = $user['password_hash'];
 $isValid = password_verify($password, $storedHash)
     || hash_equals($storedHash, hash('sha256', $password));
@@ -42,15 +42,34 @@ if (!$isValid) {
     sendJson(false, 'Mat khau khong chinh xac.', null, 401);
 }
 
-// Tu dong nang cap hash SHA-256 cu len bcrypt + random salt khi dang nhap thanh cong
+// Tu dong nang cap hash SHA-256 cu len bcrypt + random salt
 if (!password_get_info($storedHash)['algo']) {
     $newHash = password_hash($password, PASSWORD_BCRYPT);
     $upd = $pdo->prepare('UPDATE users SET password_hash = :hash WHERE id = :id');
     $upd->execute([':hash' => $newHash, ':id' => $user['id']]);
 }
 
+// Don dep cac session het han va tao Bearer Token moi (het han sau 30 phut khong hoat dong)
+$pdo->prepare('DELETE FROM user_sessions WHERE user_id = :uid AND expires_at <= NOW()')
+    ->execute([':uid' => $user['id']]);
+
+$rawToken = bin2hex(random_bytes(32));
+$tokenHash = hash('sha256', $rawToken);
+
+$pdo->prepare(
+    'INSERT INTO user_sessions (user_id, token_hash, expires_at)
+     VALUES (:uid, :thash, DATE_ADD(NOW(), INTERVAL 30 MINUTE))'
+)->execute([
+    ':uid' => $user['id'],
+    ':thash' => $tokenHash,
+]);
+
 unset($user['password_hash']);
 $user['id'] = (int)$user['id'];
 $user['ekyc_verified'] = (bool)$user['ekyc_verified'];
 
-sendJson(true, 'Dang nhap thanh cong.', ['user' => $user]);
+sendJson(true, 'Dang nhap thanh cong.', [
+    'token' => $rawToken,
+    'expires_in' => 1800,
+    'user' => $user,
+]);

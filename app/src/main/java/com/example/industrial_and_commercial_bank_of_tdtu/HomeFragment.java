@@ -136,10 +136,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadDashboardData() {
-        int userId = sessionManager.getUserId();
-        if (userId <= 0) return;
+        if (!sessionManager.isLoggedIn()) return;
 
-        ApiClient.getService().getAccounts(userId).enqueue(new Callback<ApiResponse<AccountsData>>() {
+        ApiClient.getService().getAccounts().enqueue(new Callback<ApiResponse<AccountsData>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<AccountsData>> call, @NonNull Response<ApiResponse<AccountsData>> response) {
                 if (!isAdded()) return;
@@ -168,7 +167,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        ApiClient.getService().getTransactionHistory(userId, 10).enqueue(new Callback<ApiResponse<TransactionsData>>() {
+        ApiClient.getService().getTransactionHistory(10).enqueue(new Callback<ApiResponse<TransactionsData>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<TransactionsData>> call, @NonNull Response<ApiResponse<TransactionsData>> response) {
                 if (!isAdded()) return;

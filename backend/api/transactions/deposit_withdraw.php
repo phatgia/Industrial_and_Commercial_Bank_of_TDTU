@@ -1,25 +1,25 @@
 <?php
 /**
  * POST /api/transactions/deposit_withdraw.php
- * Nap tien (DEPOSIT) hoac Rut tien (WITHDRAW) tren tai khoan CHECKING.
- * Body: { "user_id": 1, "type": "DEPOSIT" | "WITHDRAW", "amount": 500000, "description": "..." }
+ * Yeu cau Bearer Token. Nap tien (DEPOSIT) hoac Rut tien (WITHDRAW) tren tai khoan CHECKING.
  */
 
 require_once __DIR__ . '/../config/db.php';
 
 requireMethod('POST');
 
+$pdo = getDbConnection();
+$authUser = requireAuth($pdo);
+$userId = (int)$authUser['id'];
+
 $input = getRequestInput();
-$userId = (int)($input['user_id'] ?? 0);
 $type = strtoupper(trim((string)($input['type'] ?? '')));
 $amount = (float)($input['amount'] ?? 0);
 $description = trim((string)($input['description'] ?? ''));
 
-if ($userId <= 0 || !in_array($type, ['DEPOSIT', 'WITHDRAW'], true) || $amount <= 0) {
-    sendJson(false, 'Tham so khong hop le (can user_id, type DEPOSIT/WITHDRAW, amount > 0).', null, 400);
+if (!in_array($type, ['DEPOSIT', 'WITHDRAW'], true) || $amount <= 0) {
+    sendJson(false, 'Tham so khong hop le (can type DEPOSIT/WITHDRAW, amount > 0).', null, 400);
 }
-
-$pdo = getDbConnection();
 
 try {
     $pdo->beginTransaction();

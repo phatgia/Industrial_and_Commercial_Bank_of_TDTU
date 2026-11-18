@@ -1,34 +1,34 @@
 <?php
 /**
  * POST /api/utilities/pay.php
- * Thanh toan hoa don tien ich tu tai khoan CHECKING bang ACID Transaction.
- * Body: { "user_id": 1, "bill_id": 1 } hoac { "user_id": 1, "bill_code": "EVN-TDTU-1126" }
+ * Yeu cau Bearer Token. Thanh toan hoa don cua chinh user dang dang nhap.
  */
 
 require_once __DIR__ . '/../config/db.php';
 
 requireMethod('POST');
 
+$pdo = getDbConnection();
+$authUser = requireAuth($pdo);
+$userId = (int)$authUser['id'];
+
 $input = getRequestInput();
-$userId = (int)($input['user_id'] ?? 0);
 $billId = (int)($input['bill_id'] ?? 0);
 $billCode = trim((string)($input['bill_code'] ?? ''));
 
-if ($userId <= 0 || ($billId <= 0 && $billCode === '')) {
-    sendJson(false, 'Thieu user_id va bill_id hoac bill_code.', null, 400);
+if ($billId <= 0 && $billCode === '') {
+    sendJson(false, 'Thieu bill_id hoac bill_code.', null, 400);
 }
-
-$pdo = getDbConnection();
 
 try {
     $pdo->beginTransaction();
 
     if ($billId > 0) {
-        $billStmt = $pdo->prepare('SELECT * FROM utility_bills WHERE id = :id LIMIT 1 FOR UPDATE');
-        $billStmt->execute([':id' => $billId]);
+        $billStmt = $pdo->prepare('SELECT * FROM utility_bills WHERE id = :id AND user_id = :uid LIMIT 1 FOR UPDATE');
+        $billStmt->execute([':id' => $billId, ':uid' => $userId]);
     } else {
-        $billStmt = $pdo->prepare('SELECT * FROM utility_bills WHERE bill_code = :code LIMIT 1 FOR UPDATE');
-        $billStmt->execute([':code' => $billCode]);
+        $billStmt = $pdo->prepare('SELECT * FROM utility_bills WHERE bill_code = :code AND user_id = :uid LIMIT 1 FOR UPDATE');
+        $billStmt->execute([':code' => $billCode, ':uid' => $userId]);
     }
     $bill = $billStmt->fetch();
 
@@ -58,7 +58,6 @@ try {
         sendJson(false, 'So du tai khoan khong du de thanh toan hoa don.', null, 400);
     }
 
-    // Tru tien tai khoan & gach no hoa don
     $pdo->prepare('UPDATE accounts SET balance = balance - :amt WHERE id = :acc_id')
         ->execute([':amt' => $amount, ':acc_id' => $acc['id']]);
     $pdo->prepare('UPDATE utility_bills SET is_paid = 1 WHERE id = :bid')

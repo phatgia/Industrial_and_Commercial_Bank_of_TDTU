@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         // Xoa phien dang nhap khi thoat app (khong xoa neu chi xoay man hinh)
         if (!isChangingConfigurations()) {
-            new SessionManager().clear();
+            new SessionManager().logoutAndClear();
         }
     }
 }

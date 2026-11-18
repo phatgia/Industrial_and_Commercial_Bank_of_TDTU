@@ -1,6 +1,6 @@
 <?php
 /**
- * Khoi tao ket noi PDO toi MySQL va cac ham helper tra ve JSON chuan.
+ * Khoi tao ket noi PDO toi MySQL, JSON helpers va xac thuc Bearer Token.
  */
 
 $configFile = __DIR__ . '/config.php';
@@ -26,9 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-/**
- * Tra ve JSON response va dung script.
- */
 function sendJson(bool $success, string $message, mixed $data = null, int $statusCode = 200): never
 {
     http_response_code($statusCode);
@@ -43,9 +40,6 @@ function sendJson(bool $success, string $message, mixed $data = null, int $statu
     exit;
 }
 
-/**
- * Kiem tra HTTP method bat buoc.
- */
 function requireMethod(string $method): void
 {
     if ($_SERVER['REQUEST_METHOD'] !== strtoupper($method)) {
@@ -53,9 +47,6 @@ function requireMethod(string $method): void
     }
 }
 
-/**
- * Doc body JSON hoac fallback ve $_POST.
- */
 function getRequestInput(): array
 {
     $raw = file_get_contents('php://input');
@@ -68,9 +59,6 @@ function getRequestInput(): array
     return $_POST;
 }
 
-/**
- * Ket noi PDO singleton toi MySQL.
- */
 function getDbConnection(): PDO
 {
     static $pdo = null;
@@ -89,4 +77,75 @@ function getDbConnection(): PDO
     } catch (PDOException $e) {
         sendJson(false, 'Khong the ket noi co so du lieu. Kiem tra lai config/config.php.', null, 500);
     }
+}
+
+/**
+ * Doc Bearer token tu HTTP Header Authorization (ho tro nhieu cau hinh Apache/CGI).
+ */
+function getBearerToken(): ?string
+{
+    $header = $_SERVER['HTTP_AUTHORIZATION']
+        ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+        ?? '';
+
+    if ($header === '' && function_exists('getallheaders')) {
+        foreach (getallheaders() as $key => $val) {
+            if (strcasecmp((string)$key, 'Authorization') === 0) {
+                $header = (string)$val;
+                break;
+            }
+        }
+    }
+
+    if (preg_match('/^\s*Bearer\s+(\S+)\s*$/i', $header, $matches)) {
+        return $matches[1];
+    }
+    return null;
+}
+
+/**
+ * Xac thuc phien dang nhap qua Bearer Token. Tu dong gia han them 30 phut khi con hoat dong.
+ */
+function requireAuth(PDO $pdo): array
+{
+    $token = getBearerToken();
+    if ($token === null || $token === '') {
+        sendJson(false, 'Yeu cau dang nhap (Thieu Bearer Token).', null, 401);
+    }
+
+    $tokenHash = hash('sha256', $token);
+    $stmt = $pdo->prepare(
+        'SELECT s.id AS session_id, u.id, u.full_name, u.email, u.phone, u.role, u.ekyc_face_path, u.ekyc_verified, u.created_at
+         FROM user_sessions s
+         INNER JOIN users u ON s.user_id = u.id
+         WHERE s.token_hash = :thash AND s.expires_at > NOW()
+         LIMIT 1'
+    );
+    $stmt->execute([':thash' => $tokenHash]);
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        sendJson(false, 'Phien dang nhap khong hop le hoac da het han.', null, 401);
+    }
+
+    // Gia han phien them 30 phut (sliding session timeout)
+    $pdo->prepare('UPDATE user_sessions SET expires_at = DATE_ADD(NOW(), INTERVAL 30 MINUTE) WHERE id = :sid')
+        ->execute([':sid' => $row['session_id']]);
+
+    unset($row['session_id']);
+    $row['id'] = (int)$row['id'];
+    $row['ekyc_verified'] = (bool)$row['ekyc_verified'];
+    return $row;
+}
+
+/**
+ * Chi cho phep tai khoan nhan vien ngan hang (OFFICER) truy cap.
+ */
+function requireOfficer(PDO $pdo): array
+{
+    $user = requireAuth($pdo);
+    if (strtoupper((string)$user['role']) !== 'OFFICER') {
+        sendJson(false, 'Khong co quyen truy cap. Chi danh cho nhan vien ngan hang (OFFICER).', null, 403);
+    }
+    return $user;
 }

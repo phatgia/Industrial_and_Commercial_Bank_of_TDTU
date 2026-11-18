@@ -11,6 +11,7 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS `user_sessions`;
 DROP TABLE IF EXISTS `transactions`;
 DROP TABLE IF EXISTS `utility_bills`;
 DROP TABLE IF EXISTS `accounts`;
@@ -105,6 +106,19 @@ CREATE TABLE `bank_branches` (
     `longitude` DOUBLE NOT NULL,
     `opening_hours` VARCHAR(60) NOT NULL DEFAULT '08:00 - 17:00',
     PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `user_sessions` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NOT NULL,
+    `token_hash` CHAR(64) NOT NULL,
+    `expires_at` DATETIME NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_sessions_token_hash` (`token_hash`),
+    KEY `idx_sessions_user` (`user_id`),
+    CONSTRAINT `fk_sessions_user` FOREIGN KEY (`user_id`)
+        REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

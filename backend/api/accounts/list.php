@@ -1,19 +1,16 @@
 <?php
 /**
- * GET /api/accounts/list.php?user_id=1
- * Tra ve danh sach 3 loai tai khoan (CHECKING, SAVING, MORTGAGE) va chinh sach lai suat.
+ * GET /api/accounts/list.php
+ * Yeu cau Bearer Token. Chi tra ve tai khoan cua chinh user dang dang nhap.
  */
 
 require_once __DIR__ . '/../config/db.php';
 
 requireMethod('GET');
 
-$userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
-if ($userId <= 0) {
-    sendJson(false, 'Thieu tham so user_id hop le.', null, 400);
-}
-
 $pdo = getDbConnection();
+$authUser = requireAuth($pdo);
+$userId = (int)$authUser['id'];
 
 $policyStmt = $pdo->query(
     'SELECT saving_interest_rate, high_value_threshold FROM bank_policies ORDER BY id ASC LIMIT 1'
