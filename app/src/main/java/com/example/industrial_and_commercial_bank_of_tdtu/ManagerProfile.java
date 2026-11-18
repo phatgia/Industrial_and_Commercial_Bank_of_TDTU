@@ -7,6 +7,8 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager;
+
 public class ManagerProfile extends AppCompatActivity {
 
     @Override
@@ -19,6 +21,7 @@ public class ManagerProfile extends AppCompatActivity {
             btnLogout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    new SessionManager().clear();
                     Intent intent = new Intent(ManagerProfile.this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);

@@ -168,16 +168,18 @@
                         android:layout_marginTop="10dp"/>
 
                     <TextView
+                        android:id="@+id/txtCheckingNumber"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tài khoản thanh toán"
+                        android:text="STK: --"
                         android:textSize="10sp"
                         android:layout_marginTop="10dp"/>
 
                     <TextView
+                        android:id="@+id/txtCheckingBalance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="48.256.000đ"
+                        android:text="0 đ"
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:layout_marginTop="20dp"/>
@@ -229,24 +231,27 @@
                         android:layout_marginTop="10dp"/>
 
                     <TextView
+                        android:id="@+id/txtSavingNumber"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tài khoản thanh toán"
+                        android:text="STK: --"
                         android:textSize="10sp"
                         android:layout_marginTop="10dp"/>
 
                     <TextView
+                        android:id="@+id/txtSavingBalance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="120.000.000đ"
+                        android:text="0 đ"
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:layout_marginTop="20dp"/>
 
                     <TextView
+                        android:id="@+id/txtSavingProfit"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Số dư khả dụng"
+                        android:text="Lãi suất: --"
                         android:textSize="10sp"
                         android:layout_marginTop="10dp"/>
 
@@ -300,24 +305,27 @@
                         android:layout_marginTop="10dp"/>
 
                     <TextView
+                        android:id="@+id/txtMortgageNumber"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tài khoản thanh toán"
+                        android:text="STK: --"
                         android:textSize="10sp"
                         android:layout_marginTop="10dp"/>
 
                     <TextView
+                        android:id="@+id/txtMortgageBalance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1.248.256.000đ"
+                        android:text="0 đ"
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:layout_marginTop="20dp"/>
 
                     <TextView
+                        android:id="@+id/txtMortgagePayment"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Số dư khả dụng"
+                        android:text="Trả định kỳ: --"
                         android:textSize="10sp"
                         android:layout_marginTop="10dp"/>
 
@@ -486,6 +494,7 @@
                             android:textColor="@color/material_dynamic_neutral_variant70"/>
 
                         <TextView
+                            android:id="@+id/txtCardHolderName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="TRAN GIA PHAT"

@@ -1,5 +1,6 @@
 package com.example.industrial_and_commercial_bank_of_tdtu;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -106,14 +107,13 @@ public class LoginFragment extends Fragment {
 
     private void navigateByRole(String role, String fullName) {
         Toast.makeText(requireContext(), "Chào mừng " + fullName, Toast.LENGTH_SHORT).show();
-        if (getActivity() instanceof MainActivity) {
-            MainActivity mainActivity = (MainActivity) getActivity();
-            if ("OFFICER".equalsIgnoreCase(role)) {
-                Toast.makeText(requireContext(),
-                        "Đăng nhập với quyền Nhân viên ngân hàng (Officer).",
-                        Toast.LENGTH_LONG).show();
-            }
-            mainActivity.showMainContent();
+        if (getActivity() == null) return;
+        if ("OFFICER".equalsIgnoreCase(role)) {
+            Intent intent = new Intent(getActivity(), DashBoard.class);
+            startActivity(intent);
+            getActivity().finish();
+        } else if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).showMainContent();
         }
     }
 }

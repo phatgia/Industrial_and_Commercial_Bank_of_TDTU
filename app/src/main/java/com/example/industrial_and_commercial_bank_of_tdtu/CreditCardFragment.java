@@ -19,17 +19,55 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.industrial_and_commercial_bank_of_tdtu.model.AccountsData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.BankAccount;
+import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiClient;
+import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager;
+
+import java.text.NumberFormat;
+import java.util.List;
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class CreditCardFragment extends Fragment {
 
-    ImageButton imgProfile, btnBack;
-    Button btnDeposit, btnWithdraw, btnTransfer, btnAddCard;
+    private ImageButton imgProfile, btnBack;
+    private Button btnDeposit, btnWithdraw, btnTransfer, btnAddCard;
+    private TextView txtName, txtCardHolderName;
+    private TextView txtCheckingNumber, txtCheckingBalance;
+    private TextView txtSavingNumber, txtSavingBalance, txtSavingProfit;
+    private TextView txtMortgageNumber, txtMortgageBalance, txtMortgagePayment;
+
+    private SessionManager sessionManager;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_credit_card, container, false);
 
+        sessionManager = new SessionManager(requireContext());
         MainActivity mainActivity = (getActivity() instanceof MainActivity) ? (MainActivity) getActivity() : null;
+
+        txtName = view.findViewById(R.id.txtName);
+        txtCardHolderName = view.findViewById(R.id.txtCardHolderName);
+        txtCheckingNumber = view.findViewById(R.id.txtCheckingNumber);
+        txtCheckingBalance = view.findViewById(R.id.txtCheckingBalance);
+        txtSavingNumber = view.findViewById(R.id.txtSavingNumber);
+        txtSavingBalance = view.findViewById(R.id.txtSavingBalance);
+        txtSavingProfit = view.findViewById(R.id.txtSavingProfit);
+        txtMortgageNumber = view.findViewById(R.id.txtMortgageNumber);
+        txtMortgageBalance = view.findViewById(R.id.txtMortgageBalance);
+        txtMortgagePayment = view.findViewById(R.id.txtMortgagePayment);
+
+        String fullName = sessionManager.getFullName();
+        if (!fullName.isEmpty()) {
+            if (txtName != null) txtName.setText(fullName);
+            if (txtCardHolderName != null) txtCardHolderName.setText(fullName.toUpperCase(Locale.ROOT));
+        }
 
         imgProfile = view.findViewById(R.id.imgProfile);
         imgProfile.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +100,58 @@ public class CreditCardFragment extends Fragment {
         if (btnTransfer != null) btnTransfer.setOnClickListener(v -> showTransferDialog());
         if (btnAddCard != null) btnAddCard.setOnClickListener(v -> showActionDialog("Thêm thẻ mới", "Nhập số thẻ", "Nhập tên chủ thẻ"));
 
+        loadAccountsData();
+
         return view;
+    }
+
+    private void loadAccountsData() {
+        int userId = sessionManager.getUserId();
+        if (userId <= 0) return;
+
+        ApiClient.getService().getAccounts(userId).enqueue(new Callback<ApiResponse<AccountsData>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<AccountsData>> call, @NonNull Response<ApiResponse<AccountsData>> response) {
+                if (!isAdded()) return;
+                ApiResponse<AccountsData> body = response.body();
+                if (!response.isSuccessful() || body == null || !body.isSuccess() || body.getData() == null) {
+                    return;
+                }
+
+                List<BankAccount> accounts = body.getData().getAccounts();
+                if (accounts == null) return;
+
+                NumberFormat vnd = NumberFormat.getInstance(new Locale("vi", "VN"));
+                for (BankAccount acc : accounts) {
+                    String type = acc.getAccountType();
+                    if ("CHECKING".equalsIgnoreCase(type)) {
+                        if (txtCheckingNumber != null) txtCheckingNumber.setText("STK: " + acc.getAccountNumber());
+                        if (txtCheckingBalance != null) txtCheckingBalance.setText(vnd.format(Math.round(acc.getBalance())) + " đ");
+                    } else if ("SAVING".equalsIgnoreCase(type)) {
+                        if (txtSavingNumber != null) txtSavingNumber.setText("STK: " + acc.getAccountNumber());
+                        if (txtSavingBalance != null) txtSavingBalance.setText(vnd.format(Math.round(acc.getBalance())) + " đ");
+                        if (txtSavingProfit != null) {
+                            txtSavingProfit.setText(String.format(Locale.US, "Lãi %.1f%%/năm • +%s đ/tháng",
+                                    acc.getInterestRate(),
+                                    vnd.format(Math.round(acc.getEstimatedMonthlyProfit()))));
+                        }
+                    } else if ("MORTGAGE".equalsIgnoreCase(type)) {
+                        if (txtMortgageNumber != null) txtMortgageNumber.setText("HĐ: " + acc.getAccountNumber());
+                        if (txtMortgageBalance != null) txtMortgageBalance.setText(vnd.format(Math.round(acc.getBalance())) + " đ");
+                        if (txtMortgagePayment != null) {
+                            String cycleText = "BIWEEKLY".equalsIgnoreCase(acc.getPaymentCycle()) ? "2 tuần" : "tháng";
+                            txtMortgagePayment.setText("Trả " + vnd.format(Math.round(acc.getPeriodicPayment())) + " đ / " + cycleText);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<AccountsData>> call, @NonNull Throwable t) {
+                if (!isAdded()) return;
+                Toast.makeText(requireContext(), "Không tải được danh sách tài khoản.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void showWithdrawDialog() {
@@ -132,10 +221,6 @@ public class CreditCardFragment extends Fragment {
         });
 
         dialog.show();
-    }
-
-    private void showActionDialog(String title, String hint1) {
-        showActionDialog(title, hint1, null);
     }
 
     private void showActionDialog(String title, String hint1, String hint2) {

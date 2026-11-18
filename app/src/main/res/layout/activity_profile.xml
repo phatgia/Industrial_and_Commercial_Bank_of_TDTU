@@ -169,9 +169,11 @@
                     android:text="Số điện thoại"/>
 
                 <TextView
+                    android:id="@+id/txtProfilePhone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1"/>
+                    android:text="0901234567"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -185,9 +187,11 @@
                     android:text="Giấy tờ tùy thân"/>
 
                 <TextView
+                    android:id="@+id/txtProfileEkyc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1"/>
+                    android:text="Chưa xác thực eKYC"
+                    android:textStyle="bold" />
 
             </LinearLayout>
         </LinearLayout>
@@ -210,9 +214,11 @@
                     android:text="Email"/>
 
                 <TextView
+                    android:id="@+id/txtProfileEmail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1"/>
+                    android:text="email@tdtu.edu.vn"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -226,9 +232,11 @@
                     android:text="Chi nhánh"/>
 
                 <TextView
+                    android:id="@+id/txtProfileBranch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1"/>
+                    android:text="TDT Quận 7"
+                    android:textStyle="bold" />
 
             </LinearLayout>
         </LinearLayout>

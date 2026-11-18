@@ -20,6 +20,8 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager;
+
 public class UtilitiesFragment extends Fragment {
 
     ImageButton imgProfile;
@@ -32,6 +34,12 @@ public class UtilitiesFragment extends Fragment {
         View view = inflater.inflate(R.layout.activity_utilities, container, false);
 
         MainActivity mainActivity = (getActivity() instanceof MainActivity) ? (MainActivity) getActivity() : null;
+
+        TextView txtName = view.findViewById(R.id.txtName);
+        SessionManager sessionManager = new SessionManager(requireContext());
+        if (txtName != null && !sessionManager.getFullName().isEmpty()) {
+            txtName.setText(sessionManager.getFullName());
+        }
 
         imgProfile = view.findViewById(R.id.imgProfile);
         imgProfile.setOnClickListener(new View.OnClickListener() {
@@ -65,9 +73,15 @@ public class UtilitiesFragment extends Fragment {
         btnTranferOut3 = view.findViewById(R.id.btnTranferOut3); // Mua sắm
         btnTranferIn3 = view.findViewById(R.id.btnTranferIn3); // Xem thêm
 
-        if (btnTranferOut != null) btnTranferOut.setOnClickListener(v -> showUtilityDialog("Thanh toán tiền điện", "Nhập mã khách hàng EVN"));
-        if (btnTranferIn != null) btnTranferIn.setOnClickListener(v -> showUtilityDialog("Thanh toán tiền nước", "Nhập mã khách hàng"));
-        if (btnTranferOut1 != null) btnTranferOut1.setOnClickListener(v -> showUtilityDialog("Nạp tiền điện thoại", "Nhập số điện thoại", "Nhập số tiền cần nạp"));
+        if (btnTranferOut != null) btnTranferOut.setOnClickListener(v -> {
+            if (mainActivity != null) mainActivity.loadFragment(new ElectricityFragment(), true);
+        });
+        if (btnTranferIn != null) btnTranferIn.setOnClickListener(v -> {
+            if (mainActivity != null) mainActivity.loadFragment(new WaterFragment(), true);
+        });
+        if (btnTranferOut1 != null) btnTranferOut1.setOnClickListener(v -> {
+            if (mainActivity != null) mainActivity.loadFragment(new TopUpFragment(), true);
+        });
         if (btnTranferIn1 != null) btnTranferIn1.setOnClickListener(v -> showUtilityDialog("Đặt vé máy bay", "Điểm đi - Điểm đến", "Ngày bay (DD/MM/YYYY)"));
         if (btnTranferOut2 != null) btnTranferOut2.setOnClickListener(v -> showUtilityDialog("Mua vé xem phim", "Nhập tên rạp chiếu", "Nhập tên phim"));
         if (btnTranferIn2 != null) btnTranferIn2.setOnClickListener(v -> showUtilityDialog("Đặt khách sạn", "Nhập thành phố / tên khách sạn"));
