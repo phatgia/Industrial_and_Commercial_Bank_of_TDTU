@@ -18,6 +18,7 @@ public class SessionManager {
 
     private static volatile User currentUser;
     private static volatile String authToken;
+    private static volatile String checkingAccountNumber;
 
     public SessionManager() {
     }
@@ -41,6 +42,14 @@ public class SessionManager {
 
     public String getToken() {
         return authToken;
+    }
+
+    public void setCheckingAccountNumber(String accountNumber) {
+        checkingAccountNumber = accountNumber;
+    }
+
+    public String getCheckingAccountNumber() {
+        return checkingAccountNumber != null ? checkingAccountNumber : "";
     }
 
     public int getUserId() {
@@ -74,6 +83,7 @@ public class SessionManager {
     public void clear() {
         currentUser = null;
         authToken = null;
+        checkingAccountNumber = null;
     }
 
     /**

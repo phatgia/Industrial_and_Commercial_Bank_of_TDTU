@@ -49,9 +49,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <TextView
+                android:id="@+id/tvSourceBankName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chọn ngân hàng nạp"
+                android:text="Vietcombank"
                 android:textSize="14sp"
                 android:textColor="#1E293B"
                 android:textStyle="bold"/>
@@ -113,9 +114,10 @@
                 android:textColor="#1E293B"
                 android:textStyle="bold"/>
             <TextView
+                android:id="@+id/tvTargetBalance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="48.256.000đ"
+                android:text="0 đ"
                 android:textSize="12sp"
                 android:textColor="#64748B"/>
         </LinearLayout>

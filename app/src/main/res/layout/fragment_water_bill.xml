@@ -119,7 +119,7 @@
                     android:layout_weight="1"
                     android:layout_height="56dp"
                     android:background="@null"
-                    android:hint="Ví dụ: WA112233"
+                    android:hint="Ví dụ: WTR-Q7-8821"
                     android:inputType="textCapCharacters"
                     android:textSize="16sp"/>
 

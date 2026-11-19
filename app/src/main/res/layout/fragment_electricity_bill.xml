@@ -112,7 +112,7 @@
                     android:layout_weight="1"
                     android:layout_height="56dp"
                     android:background="@null"
-                    android:hint="Ví dụ: PE012345"
+                    android:hint="Ví dụ: EVN-TDTU-1126"
                     android:inputType="textCapCharacters"
                     android:textSize="16sp"/>
 

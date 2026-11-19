@@ -16,12 +16,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.BalanceUpdateData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.DepositWithdrawRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransactionResult;
+import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiClient;
+import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiErrorHelper;
+import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TopUpFragment extends Fragment {
 
@@ -30,19 +40,20 @@ public class TopUpFragment extends Fragment {
     private TextView tvFinalAmount, tvDiscount;
     private TextView[] valButtons;
     private double selectedValue = 0;
+    private SessionManager sessionManager;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_topup, container, false);
 
+        sessionManager = new SessionManager(requireContext());
         etPhone = view.findViewById(R.id.etPhone);
         btnContinue = view.findViewById(R.id.btnContinue);
         tvFinalAmount = view.findViewById(R.id.tvFinalAmount);
         tvDiscount = view.findViewById(R.id.tvDiscount);
 
         ImageButton btnBack = view.findViewById(R.id.btnBack);
-
         btnBack.setOnClickListener(v -> {
             if (getActivity() != null) {
                 getActivity().getSupportFragmentManager().popBackStack();
@@ -84,12 +95,10 @@ public class TopUpFragment extends Fragment {
     }
 
     private void selectValue(TextView selectedBtn, double value) {
-        // Reset all
         for (TextView btn : valButtons) {
             btn.setBackgroundResource(R.drawable.bg_card_white);
         }
 
-        // Highlight selected
         selectedBtn.setBackgroundResource(R.drawable.bg_input_stroke);
 
         selectedValue = value;
@@ -108,27 +117,58 @@ public class TopUpFragment extends Fragment {
     }
 
     private void processPayment() {
-        if (getContext() == null) return;
-
         String phone = etPhone.getText().toString().trim();
-        double finalAmount = selectedValue * 0.98;
-
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault());
-        String currentDate = sdf.format(new Date());
-        String transactionId = "FT" + System.currentTimeMillis();
-
-        TransactionResult result = new TransactionResult(
-                transactionId,
-                currentDate,
-                finalAmount,
-                "Nạp tiền điện thoại - " + phone,
-                "Viettel/Mobifone/Vinaphone", // Simplified mock
-                "Thành công",
-                "0098****2846"
-        );
-
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).loadFragment(ReceiptFragment.newInstance(result), true);
+        if (phone.isEmpty() || selectedValue <= 0) {
+            Toast.makeText(requireContext(), "Vui lòng nhập số điện thoại và chọn mệnh giá.", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        double finalAmount = selectedValue * 0.98;
+        String desc = "Nạp tiền điện thoại " + phone;
+
+        btnContinue.setEnabled(false);
+        DepositWithdrawRequest req = new DepositWithdrawRequest("WITHDRAW", finalAmount, desc);
+        ApiClient.getService().depositOrWithdraw(req).enqueue(new Callback<ApiResponse<BalanceUpdateData>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<BalanceUpdateData>> call,
+                                   @NonNull Response<ApiResponse<BalanceUpdateData>> response) {
+                if (!isAdded()) return;
+                btnContinue.setEnabled(true);
+
+                ApiResponse<BalanceUpdateData> body = response.body();
+                if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault());
+                    String currentDate = sdf.format(new Date());
+                    String transactionId = "FT" + body.getData().getTxId();
+                    String sourceAccount = !sessionManager.getCheckingAccountNumber().isEmpty()
+                            ? sessionManager.getCheckingAccountNumber()
+                            : "Tài khoản thanh toán";
+
+                    TransactionResult result = new TransactionResult(
+                            transactionId,
+                            currentDate,
+                            finalAmount,
+                            "Nạp tiền điện thoại - " + phone,
+                            "Nạp thẻ điện thoại",
+                            "Thành công",
+                            sourceAccount
+                    );
+
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).loadFragment(ReceiptFragment.newInstance(result), true);
+                    }
+                } else {
+                    String msg = ApiErrorHelper.extractMessage(response, "Nạp tiền điện thoại thất bại.");
+                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<BalanceUpdateData>> call, @NonNull Throwable t) {
+                if (!isAdded()) return;
+                btnContinue.setEnabled(true);
+                Toast.makeText(requireContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

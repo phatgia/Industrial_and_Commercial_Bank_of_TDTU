@@ -2,10 +2,17 @@ package com.example.industrial_and_commercial_bank_of_tdtu.network;
 
 import com.example.industrial_and_commercial_bank_of_tdtu.model.AccountsData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.BalanceUpdateData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.BranchesData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.DepositWithdrawRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.PayBillRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransactionsData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferConfirmData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferOtpData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.UtilityBillsData;
 
 import java.util.Map;
 
@@ -35,6 +42,24 @@ public interface BankApiService {
 
     @GET("transactions/history.php")
     Call<ApiResponse<TransactionsData>> getTransactionHistory(@Query("limit") int limit);
+
+    @POST("transactions/transfer.php")
+    Call<ApiResponse<TransferOtpData>> requestTransferOtp(@Body TransferRequest request);
+
+    @POST("transactions/transfer.php")
+    Call<ApiResponse<TransferConfirmData>> confirmTransfer(@Body TransferRequest request);
+
+    @POST("transactions/deposit_withdraw.php")
+    Call<ApiResponse<BalanceUpdateData>> depositOrWithdraw(@Body DepositWithdrawRequest request);
+
+    @GET("utilities/bills.php")
+    Call<ApiResponse<UtilityBillsData>> getUtilityBills(
+            @Query("service_type") String serviceType,
+            @Query("bill_code") String billCode
+    );
+
+    @POST("utilities/pay.php")
+    Call<ApiResponse<BalanceUpdateData>> payUtilityBill(@Body PayBillRequest request);
 
     @GET("branches/list.php")
     Call<ApiResponse<BranchesData>> getBranches();

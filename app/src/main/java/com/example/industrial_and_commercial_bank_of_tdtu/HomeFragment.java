@@ -1,16 +1,10 @@
 package com.example.industrial_and_commercial_bank_of_tdtu;
 
-import android.app.Dialog;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +21,7 @@ import com.example.industrial_and_commercial_bank_of_tdtu.model.TransactionItem;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransactionsData;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiClient;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager;
+import com.example.industrial_and_commercial_bank_of_tdtu.ui.TransactionDialogHelper;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -93,10 +88,18 @@ public class HomeFragment extends Fragment {
         });
 
         btnTranferOut = view.findViewById(R.id.btnTranferOut);
-        btnTranferOut.setOnClickListener(v -> showTransferDialog());
+        btnTranferOut.setOnClickListener(v -> TransactionDialogHelper.showTransferDialog(
+                requireContext(),
+                formattedBalance,
+                this::loadDashboardData
+        ));
 
         btnTranferIn = view.findViewById(R.id.btnTranferIn);
-        btnTranferIn.setOnClickListener(v -> showDepositDialog());
+        btnTranferIn.setOnClickListener(v -> TransactionDialogHelper.showDepositDialog(
+                requireContext(),
+                formattedBalance,
+                this::loadDashboardData
+        ));
 
         btnUtility = view.findViewById(R.id.btnBill);
         btnUtility.setOnClickListener(new View.OnClickListener() {
@@ -150,6 +153,7 @@ public class HomeFragment extends Fragment {
                         for (BankAccount acc : accounts) {
                             if ("CHECKING".equalsIgnoreCase(acc.getAccountType())) {
                                 checkingOrTotal = acc.getBalance();
+                                sessionManager.setCheckingAccountNumber(acc.getAccountNumber());
                                 break;
                             }
                         }
@@ -186,51 +190,5 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(requireContext(), "Không tải được lịch sử giao dịch.", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void showTransferDialog() {
-        if (getContext() == null) return;
-        Dialog dialog = new Dialog(getContext());
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_transfer);
-        
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        }
-
-        Button btnConfirm = dialog.findViewById(R.id.btnConfirm);
-        Button btnCancel = dialog.findViewById(R.id.btnCancel);
-
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-        btnConfirm.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Yêu cầu chuyển tiền đang xử lý", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
-        });
-
-        dialog.show();
-    }
-
-    private void showDepositDialog() {
-        if (getContext() == null) return;
-        Dialog dialog = new Dialog(getContext());
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_deposit);
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        }
-
-        Button btnConfirm = dialog.findViewById(R.id.btnConfirm);
-        Button btnCancel = dialog.findViewById(R.id.btnCancel);
-
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-        btnConfirm.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Yêu cầu nạp tiền đang xử lý", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
-        });
-
-        dialog.show();
     }
 }
