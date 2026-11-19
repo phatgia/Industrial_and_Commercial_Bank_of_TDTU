@@ -144,9 +144,11 @@
                     android:textSize="10sp"/>
 
                 <TextView
+                    android:id="@+id/tvMoneyIn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="+21.126.000 đ"
+                    android:text="+0 đ"
+                    android:textColor="#16A34A"
                     android:textStyle="bold"/>
             </LinearLayout>
 
@@ -168,9 +170,11 @@
                     android:textSize="10sp"/>
 
                 <TextView
+                    android:id="@+id/tvMoneyOut"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="-21.126.000 đ"
+                    android:text="-0 đ"
+                    android:textColor="#DC2626"
                     android:textStyle="bold"
                     />
             </LinearLayout>
@@ -191,9 +195,11 @@
                 android:src="@drawable/search"/>
 
             <EditText
+                android:id="@+id/etSearchTx"
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
-                android:hint="Timf kiếm theo tên hoặc nội dung"
+                android:background="@null"
+                android:hint="Tìm kiếm theo tên hoặc nội dung"
                 android:textSize="13sp"
                 />
 
@@ -208,6 +214,7 @@
             android:padding="10dp">
 
             <Button
+                android:id="@+id/btnFilterAll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tất cả"
@@ -215,6 +222,7 @@
                 />
 
             <Button
+                android:id="@+id/btnFilterOut"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tiền ra"
@@ -222,6 +230,7 @@
                 />
 
             <Button
+                android:id="@+id/btnFilterIn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tiền vào"

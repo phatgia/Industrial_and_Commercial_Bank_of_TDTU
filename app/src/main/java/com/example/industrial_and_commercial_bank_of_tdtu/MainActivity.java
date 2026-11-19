@@ -71,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
         updateNavUI(0);
     }
 
+    public void showLoginScreen() {
+        bottomNav.setVisibility(View.GONE);
+        btnCenter.setVisibility(View.GONE);
+        loadFragment(new LoginFragment(), false);
+    }
+
     public void loadFragment(Fragment fragment, boolean addToBackStack) {
         if (!addToBackStack) {
             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);

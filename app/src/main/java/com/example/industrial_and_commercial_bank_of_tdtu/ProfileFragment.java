@@ -4,8 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +35,7 @@ public class ProfileFragment extends Fragment {
         TextView txtEmail = view.findViewById(R.id.txtProfileEmail);
         TextView txtEkyc = view.findViewById(R.id.txtProfileEkyc);
         TextView txtBranch = view.findViewById(R.id.txtProfileBranch);
+        Button btnLogout = view.findViewById(R.id.btnCustomerLogout);
 
         String fullName = sessionManager.getFullName();
         if (!fullName.isEmpty()) {
@@ -53,34 +56,35 @@ public class ProfileFragment extends Fragment {
         }
 
         btnCreditCard = view.findViewById(R.id.creditcard1);
-        btnCreditCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mainActivity != null) {
-                    mainActivity.loadFragment(new CreditCardFragment(), true);
-                }
+        btnCreditCard.setOnClickListener(v -> {
+            if (mainActivity != null) {
+                mainActivity.loadFragment(new CreditCardFragment(), true);
             }
         });
 
         btnTransHis = view.findViewById(R.id.btnTransHis);
-        btnTransHis.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mainActivity != null) {
-                    mainActivity.loadFragment(new TransactionHistoryFragment(), true);
-                }
+        btnTransHis.setOnClickListener(v -> {
+            if (mainActivity != null) {
+                mainActivity.loadFragment(new TransactionHistoryFragment(), true);
             }
         });
 
         cardBalance = view.findViewById(R.id.cardBalance);
-        cardBalance.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mainActivity != null) {
-                    mainActivity.loadFragment(new CreditCardFragment(), true);
-                }
+        cardBalance.setOnClickListener(v -> {
+            if (mainActivity != null) {
+                mainActivity.loadFragment(new CreditCardFragment(), true);
             }
         });
+
+        if (btnLogout != null) {
+            btnLogout.setOnClickListener(v -> {
+                sessionManager.logoutAndClear();
+                Toast.makeText(requireContext(), "Đã đăng xuất.", Toast.LENGTH_SHORT).show();
+                if (mainActivity != null) {
+                    mainActivity.showLoginScreen();
+                }
+            });
+        }
 
         return view;
     }

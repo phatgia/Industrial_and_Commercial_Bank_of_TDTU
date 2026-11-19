@@ -157,7 +157,15 @@
                 android:background="#F1F5F9"
                 android:layout_marginBottom="8dp"/>
 
-            <!-- List of Customers -->
+            <ListView
+                android:id="@+id/lvCustomers"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:divider="#F1F5F9"
+                android:dividerHeight="1dp" />
+
+            <!-- List of Customers (Static fallback hidden) -->
             <!-- Item 1 -->
             <LinearLayout
                 android:id="@+id/itemCustomer1"
@@ -165,7 +173,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="12dp">
+                android:paddingVertical="12dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="40dp"

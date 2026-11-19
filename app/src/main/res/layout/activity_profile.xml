@@ -245,6 +245,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/menuContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
@@ -440,5 +441,20 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCustomerLogout"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:backgroundTint="#EF4444"
+        android:text="Đăng xuất"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/menuContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

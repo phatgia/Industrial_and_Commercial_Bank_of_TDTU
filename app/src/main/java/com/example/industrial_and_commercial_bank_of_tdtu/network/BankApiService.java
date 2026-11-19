@@ -4,6 +4,8 @@ import com.example.industrial_and_commercial_bank_of_tdtu.model.AccountsData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.BalanceUpdateData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.BranchesData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.CreateCustomerRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.CustomersData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.DepositWithdrawRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginRequest;
@@ -12,6 +14,7 @@ import com.example.industrial_and_commercial_bank_of_tdtu.model.TransactionsData
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferConfirmData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferOtpData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.UpdatePolicyRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.UtilityBillsData;
 
 import java.util.Map;
@@ -60,6 +63,15 @@ public interface BankApiService {
 
     @POST("utilities/pay.php")
     Call<ApiResponse<BalanceUpdateData>> payUtilityBill(@Body PayBillRequest request);
+
+    @GET("officer/customers.php")
+    Call<ApiResponse<CustomersData>> getCustomers();
+
+    @POST("officer/customers.php")
+    Call<ApiResponse<Map<String, Object>>> createCustomer(@Body CreateCustomerRequest request);
+
+    @POST("officer/update_policy.php")
+    Call<ApiResponse<Map<String, Object>>> updatePolicy(@Body UpdatePolicyRequest request);
 
     @GET("branches/list.php")
     Call<ApiResponse<BranchesData>> getBranches();
