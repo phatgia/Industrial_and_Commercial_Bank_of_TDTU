@@ -69,6 +69,16 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        View btnEkyc = view.findViewById(R.id.btnEkyc);
+        if (btnEkyc != null) {
+            btnEkyc.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    android.content.Intent intent = new android.content.Intent(getActivity(), EkycActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+
         cardBalance = view.findViewById(R.id.cardBalance);
         cardBalance.setOnClickListener(v -> {
             if (mainActivity != null) {
