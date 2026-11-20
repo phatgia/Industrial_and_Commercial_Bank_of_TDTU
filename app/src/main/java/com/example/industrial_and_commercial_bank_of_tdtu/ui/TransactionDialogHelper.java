@@ -8,6 +8,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.view.Window;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -20,6 +23,8 @@ import com.example.industrial_and_commercial_bank_of_tdtu.R;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.BalanceUpdateData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.DepositWithdrawRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.StripeCheckoutData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.StripeCheckoutRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferConfirmData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferOtpData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferRequest;
@@ -35,8 +40,12 @@ import retrofit2.Response;
  */
 public final class TransactionDialogHelper {
 
+    private static final String STRIPE_OPTION = "Stripe (Thẻ quốc tế Test)";
     private static final String[] BANKS = {
             "ICBT Bank", "Vietcombank", "BIDV", "Techcombank", "MB Bank", "ACB"
+    };
+    private static final String[] DEPOSIT_SOURCES = {
+            STRIPE_OPTION, "Vietcombank", "BIDV", "Techcombank", "MB Bank", "ACB"
     };
 
     private TransactionDialogHelper() {
@@ -194,18 +203,26 @@ public final class TransactionDialogHelper {
         if (tvTargetBalance != null) {
             tvTargetBalance.setText(currentBalanceText);
         }
+        if (tvSourceBankName != null) {
+            tvSourceBankName.setText(STRIPE_OPTION);
+        }
         if (llSourceBank != null && tvSourceBankName != null) {
-            llSourceBank.setOnClickListener(v -> showBankPicker(context, tvSourceBankName));
+            llSourceBank.setOnClickListener(v -> showBankPicker(context, tvSourceBankName, DEPOSIT_SOURCES));
         }
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnConfirm.setOnClickListener(v -> {
-            String sourceBank = tvSourceBankName != null ? tvSourceBankName.getText().toString().trim() : "Ngân hàng ngoài";
+            String sourceBank = tvSourceBankName != null ? tvSourceBankName.getText().toString().trim() : STRIPE_OPTION;
             String sourceAcc = etSourceAccount != null ? etSourceAccount.getText().toString().trim() : "";
             double amount = parsePositiveAmount(etAmount);
 
             if (amount <= 0) {
                 Toast.makeText(context, "Vui lòng nhập số tiền hợp lệ (> 0).", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (STRIPE_OPTION.equals(sourceBank)) {
+                startStripeDeposit(context, dialog, btnConfirm, amount, onSuccess);
                 return;
             }
 
@@ -315,10 +332,88 @@ public final class TransactionDialogHelper {
         return dialog;
     }
 
+    private static void startStripeDeposit(Context context,
+                                           Dialog depositDialog,
+                                           Button btnConfirm,
+                                           double amount,
+                                           Runnable onSuccess) {
+        if (amount < 20000) {
+            Toast.makeText(context, "Nạp qua Stripe tối thiểu 20.000 VND.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        btnConfirm.setEnabled(false);
+        ApiClient.getService().createStripeCheckout(new StripeCheckoutRequest(amount))
+                .enqueue(new Callback<ApiResponse<StripeCheckoutData>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<StripeCheckoutData>> call,
+                                           @NonNull Response<ApiResponse<StripeCheckoutData>> response) {
+                        btnConfirm.setEnabled(true);
+                        ApiResponse<StripeCheckoutData> body = response.body();
+                        if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
+                            depositDialog.dismiss();
+                            showStripeWebViewDialog(context, body.getData(), onSuccess);
+                        } else {
+                            String msg = ApiErrorHelper.extractMessage(response, "Không khởi tạo được cổng Stripe.");
+                            Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<StripeCheckoutData>> call, @NonNull Throwable t) {
+                        btnConfirm.setEnabled(true);
+                        Toast.makeText(context, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private static void showStripeWebViewDialog(Context context,
+                                                StripeCheckoutData data,
+                                                Runnable onSuccess) {
+        Dialog webDialog = new Dialog(context);
+        webDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        WebView webView = new WebView(context);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+
+        final boolean[] handled = {false};
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                if (handled[0] || url == null) return;
+                if (data.getSuccessUrlPrefix() != null && url.startsWith(data.getSuccessUrlPrefix())) {
+                    handled[0] = true;
+                    webDialog.dismiss();
+                    Toast.makeText(context, "Nạp tiền qua Stripe thành công!", Toast.LENGTH_SHORT).show();
+                    if (onSuccess != null) {
+                        onSuccess.run();
+                    }
+                } else if (data.getCancelUrlPrefix() != null && url.startsWith(data.getCancelUrlPrefix())) {
+                    handled[0] = true;
+                    webDialog.dismiss();
+                    Toast.makeText(context, "Đã hủy thanh toán Stripe.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        webView.loadUrl(data.getCheckoutUrl());
+        webDialog.setContentView(webView);
+        if (webDialog.getWindow() != null) {
+            webDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        }
+        webDialog.show();
+    }
+
     private static void showBankPicker(Context context, TextView targetTextView) {
+        showBankPicker(context, targetTextView, BANKS);
+    }
+
+    private static void showBankPicker(Context context, TextView targetTextView, String[] options) {
         new AlertDialog.Builder(context)
                 .setTitle("Chọn ngân hàng")
-                .setItems(BANKS, (d, which) -> targetTextView.setText(BANKS[which]))
+                .setItems(options, (d, which) -> targetTextView.setText(options[which]))
                 .show();
     }
 

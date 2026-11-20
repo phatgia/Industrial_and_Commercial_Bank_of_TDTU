@@ -10,6 +10,8 @@ import com.example.industrial_and_commercial_bank_of_tdtu.model.DepositWithdrawR
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.PayBillRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.StripeCheckoutData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.StripeCheckoutRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransactionsData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferConfirmData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferOtpData;
@@ -54,6 +56,9 @@ public interface BankApiService {
 
     @POST("transactions/deposit_withdraw.php")
     Call<ApiResponse<BalanceUpdateData>> depositOrWithdraw(@Body DepositWithdrawRequest request);
+
+    @POST("transactions/stripe_checkout.php")
+    Call<ApiResponse<StripeCheckoutData>> createStripeCheckout(@Body StripeCheckoutRequest request);
 
     @GET("utilities/bills.php")
     Call<ApiResponse<UtilityBillsData>> getUtilityBills(
