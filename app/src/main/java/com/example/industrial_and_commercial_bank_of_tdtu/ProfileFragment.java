@@ -20,6 +20,8 @@ public class ProfileFragment extends Fragment {
 
     private LinearLayout btnCreditCard, btnTransHis;
     private ConstraintLayout cardBalance;
+    private TextView txtEkyc;
+    private SessionManager sessionManager;
 
     @Nullable
     @Override
@@ -27,13 +29,13 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.activity_profile, container, false);
 
         MainActivity mainActivity = (getActivity() instanceof MainActivity) ? (MainActivity) getActivity() : null;
-        SessionManager sessionManager = new SessionManager(requireContext());
+        sessionManager = new SessionManager(requireContext());
 
         TextView txtName = view.findViewById(R.id.txtName);
         TextView txtCardName = view.findViewById(R.id.txtBalance);
         TextView txtPhone = view.findViewById(R.id.txtProfilePhone);
         TextView txtEmail = view.findViewById(R.id.txtProfileEmail);
-        TextView txtEkyc = view.findViewById(R.id.txtProfileEkyc);
+        txtEkyc = view.findViewById(R.id.txtProfileEkyc);
         TextView txtBranch = view.findViewById(R.id.txtProfileBranch);
         Button btnLogout = view.findViewById(R.id.btnCustomerLogout);
 
@@ -97,5 +99,13 @@ public class ProfileFragment extends Fragment {
         }
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (txtEkyc != null && sessionManager != null) {
+            txtEkyc.setText(sessionManager.isEkycVerified() ? "Đã xác thực eKYC" : "Chưa xác thực eKYC");
+        }
     }
 }

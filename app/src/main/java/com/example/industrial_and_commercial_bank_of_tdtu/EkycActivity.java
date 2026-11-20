@@ -17,12 +17,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.EkycUploadData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.EkycUploadRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.OcrCccdData;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiClient;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiErrorHelper;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager;
 import com.google.android.material.button.MaterialButton;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Collections;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,6 +39,7 @@ public class EkycActivity extends AppCompatActivity {
     private int captureMode = MODE_FACE;
     private Bitmap frontBitmap, backBitmap, faceBitmap;
     private ImageView imgCccdFront, imgCccdBack, imgFacePreview;
+    private EditText edCccdNumber, edFullName, edDob, edAddress;
     private MaterialButton btnSubmitEkyc;
     private SessionManager sessionManager;
 
@@ -47,6 +50,7 @@ public class EkycActivity extends AppCompatActivity {
                 if (captureMode == MODE_FRONT) {
                     frontBitmap = bitmap;
                     if (imgCccdFront != null) imgCccdFront.setImageBitmap(bitmap);
+                    runCccdOcr(bitmap);
                 } else if (captureMode == MODE_BACK) {
                     backBitmap = bitmap;
                     if (imgCccdBack != null) imgCccdBack.setImageBitmap(bitmap);
@@ -71,7 +75,11 @@ public class EkycActivity extends AppCompatActivity {
         imgCccdBack = findViewById(R.id.imgCccdBack);
         imgFacePreview = findViewById(R.id.imgFacePreview);
 
-        EditText edFullName = findViewById(R.id.edFullName);
+        edCccdNumber = findViewById(R.id.edCccdNumber);
+        edFullName = findViewById(R.id.edFullName);
+        edDob = findViewById(R.id.edDob);
+        edAddress = findViewById(R.id.edAddress);
+
         if (edFullName != null && !sessionManager.getFullName().isEmpty()) {
             edFullName.setText(sessionManager.getFullName());
         }
@@ -98,6 +106,40 @@ public class EkycActivity extends AppCompatActivity {
         btnSubmitEkyc.setOnClickListener(v -> submitEkyc());
     }
 
+    private void runCccdOcr(Bitmap frontBmp) {
+        String frontB64 = encodeBitmapToBase64(frontBmp);
+        ApiClient.getService().ocrCccd(Collections.singletonMap("id_front_base64", frontB64))
+                .enqueue(new Callback<ApiResponse<OcrCccdData>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<OcrCccdData>> call,
+                                           @NonNull Response<ApiResponse<OcrCccdData>> response) {
+                        if (isFinishing() || isDestroyed()) return;
+                        ApiResponse<OcrCccdData> body = response.body();
+                        if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
+                            OcrCccdData d = body.getData();
+                            if (edCccdNumber != null && d.getCccdNumber() != null && !d.getCccdNumber().isEmpty()) {
+                                edCccdNumber.setText(d.getCccdNumber());
+                            }
+                            if (edFullName != null && d.getFullName() != null && !d.getFullName().isEmpty()) {
+                                edFullName.setText(d.getFullName());
+                            }
+                            if (edDob != null && d.getDob() != null && !d.getDob().isEmpty()) {
+                                edDob.setText(d.getDob());
+                            }
+                            if (edAddress != null && d.getAddress() != null && !d.getAddress().isEmpty()) {
+                                edAddress.setText(d.getAddress());
+                            }
+                            Toast.makeText(EkycActivity.this, "Đã đọc thông tin CCCD tự động!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<OcrCccdData>> call, @NonNull Throwable t) {
+                        // Cho phep nguoi dung tu nhap tay neu chua co GEMINI_API_KEY
+                    }
+                });
+    }
+
     private void submitEkyc() {
         if (faceBitmap == null) {
             Toast.makeText(this, "Vui lòng chụp ảnh khuôn mặt trước khi gửi.", Toast.LENGTH_SHORT).show();
@@ -114,6 +156,7 @@ public class EkycActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<EkycUploadData>> call,
                                    @NonNull Response<ApiResponse<EkycUploadData>> response) {
+                if (isFinishing() || isDestroyed()) return;
                 btnSubmitEkyc.setEnabled(true);
                 ApiResponse<EkycUploadData> body = response.body();
                 if (response.isSuccessful() && body != null && body.isSuccess()) {
@@ -128,6 +171,7 @@ public class EkycActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<EkycUploadData>> call, @NonNull Throwable t) {
+                if (isFinishing() || isDestroyed()) return;
                 btnSubmitEkyc.setEnabled(true);
                 Toast.makeText(EkycActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }

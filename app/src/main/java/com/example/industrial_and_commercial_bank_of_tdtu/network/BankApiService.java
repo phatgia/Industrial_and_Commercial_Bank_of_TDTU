@@ -13,6 +13,7 @@ import com.example.industrial_and_commercial_bank_of_tdtu.model.EkycUploadData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.EkycUploadRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.OcrCccdData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.PayBillRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.StripeCheckoutData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.StripeCheckoutRequest;
@@ -75,6 +76,9 @@ public interface BankApiService {
 
     @POST("ekyc/upload.php")
     Call<ApiResponse<EkycUploadData>> uploadEkyc(@Body EkycUploadRequest request);
+
+    @POST("ekyc/ocr.php")
+    Call<ApiResponse<OcrCccdData>> ocrCccd(@Body Map<String, String> body);
 
     @GET("officer/customers.php")
     Call<ApiResponse<CustomersData>> getCustomers();
