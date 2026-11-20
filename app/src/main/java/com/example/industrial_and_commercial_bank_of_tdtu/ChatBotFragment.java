@@ -64,9 +64,9 @@ public class ChatBotFragment extends Fragment {
             });
         }
 
-        View cardOpenBranchMap = view.findViewById(R.id.cardOpenBranchMap);
-        if (cardOpenBranchMap != null) {
-            cardOpenBranchMap.setOnClickListener(v -> {
+        View cardMapAction = view.findViewById(R.id.cardMapAction);
+        if (cardMapAction != null) {
+            cardMapAction.setOnClickListener(v -> {
                 if (mainActivity != null) {
                     mainActivity.loadFragment(new BranchMapFragment(), true);
                 }

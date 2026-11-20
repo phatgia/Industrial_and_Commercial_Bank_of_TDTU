@@ -69,9 +69,9 @@
         app:layout_constraintTop_toTopOf="@+id/imgProfile"
         app:srcCompat="@drawable/notifications_unread_24px" />
 
-    <!-- Quick Map Card -->
+    <!-- Map & Branch Shortcut -->
     <LinearLayout
-        android:id="@+id/cardOpenBranchMap"
+        android:id="@+id/cardMapAction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -127,7 +127,7 @@
         android:layout_marginTop="10dp"
         android:paddingHorizontal="16dp"
         app:layout_constraintBottom_toTopOf="@+id/chatInputBar"
-        app:layout_constraintTop_toBottomOf="@+id/cardOpenBranchMap">
+        app:layout_constraintTop_toBottomOf="@+id/cardMapAction">
 
         <LinearLayout
             android:id="@+id/llChatMessages"
