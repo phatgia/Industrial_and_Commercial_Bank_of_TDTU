@@ -127,8 +127,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (mainActivity != null) {
-                    mainActivity.loadFragment(new ChatBotFragment(), true);
-                    mainActivity.updateNavUI(3);
+                    mainActivity.loadFragment(new BranchMapFragment(), true);
                 }
             }
         });

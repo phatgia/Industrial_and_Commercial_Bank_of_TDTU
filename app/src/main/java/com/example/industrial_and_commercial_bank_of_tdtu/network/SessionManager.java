@@ -19,6 +19,7 @@ public class SessionManager {
     private static volatile User currentUser;
     private static volatile String authToken;
     private static volatile String checkingAccountNumber;
+    private static volatile boolean ekycVerifiedOverride;
 
     public SessionManager() {
     }
@@ -30,6 +31,7 @@ public class SessionManager {
     public void saveSession(User user, String token) {
         currentUser = user;
         authToken = token;
+        ekycVerifiedOverride = user != null && user.isEkycVerified();
     }
 
     public void saveUser(User user) {
@@ -73,7 +75,11 @@ public class SessionManager {
     }
 
     public boolean isEkycVerified() {
-        return currentUser != null && currentUser.isEkycVerified();
+        return ekycVerifiedOverride || (currentUser != null && currentUser.isEkycVerified());
+    }
+
+    public void setEkycVerified(boolean verified) {
+        ekycVerifiedOverride = verified;
     }
 
     public boolean isLoggedIn() {
@@ -84,6 +90,7 @@ public class SessionManager {
         currentUser = null;
         authToken = null;
         checkingAccountNumber = null;
+        ekycVerifiedOverride = false;
     }
 
     /**

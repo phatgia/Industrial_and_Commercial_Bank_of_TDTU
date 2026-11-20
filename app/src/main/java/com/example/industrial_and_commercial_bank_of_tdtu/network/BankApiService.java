@@ -4,9 +4,13 @@ import com.example.industrial_and_commercial_bank_of_tdtu.model.AccountsData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.BalanceUpdateData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.BranchesData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.ChatData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.ChatRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.CreateCustomerRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.CustomersData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.DepositWithdrawRequest;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.EkycUploadData;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.EkycUploadRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.LoginRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.PayBillRequest;
@@ -69,6 +73,9 @@ public interface BankApiService {
     @POST("utilities/pay.php")
     Call<ApiResponse<BalanceUpdateData>> payUtilityBill(@Body PayBillRequest request);
 
+    @POST("ekyc/upload.php")
+    Call<ApiResponse<EkycUploadData>> uploadEkyc(@Body EkycUploadRequest request);
+
     @GET("officer/customers.php")
     Call<ApiResponse<CustomersData>> getCustomers();
 
@@ -80,4 +87,7 @@ public interface BankApiService {
 
     @GET("branches/list.php")
     Call<ApiResponse<BranchesData>> getBranches();
+
+    @POST("chat/ask.php")
+    Call<ApiResponse<ChatData>> askChatbot(@Body ChatRequest request);
 }
