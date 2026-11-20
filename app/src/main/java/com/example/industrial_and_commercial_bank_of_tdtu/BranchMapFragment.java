@@ -13,7 +13,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-public class BranchMapFragment extends Fragment {
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class BranchMapFragment extends Fragment implements OnMapReadyCallback {
+
+    private GoogleMap mMap;
+    private final double branchLat = 10.732669;
+    private final double branchLng = 106.699770;
+    private final String branchName = "ICBTDTU - Chi nhánh Quận 7";
+    private final String branchAddress = "19 Nguyễn Hữu Thọ, P. Tân Phong, Quận 7, TP.HCM";
 
     @Nullable
     @Override
@@ -29,11 +42,16 @@ public class BranchMapFragment extends Fragment {
             });
         }
 
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
+                .findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+
         ImageButton btnDirections = view.findViewById(R.id.btnDirections);
         if (btnDirections != null) {
             btnDirections.setOnClickListener(v -> {
-                // Mock coordinate for TDTU
-                String geoUri = "http://maps.google.com/maps?daddr=10.7326689,106.699762";
+                String geoUri = "http://maps.google.com/maps?daddr=" + branchLat + "," + branchLng;
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(geoUri));
                 if (getActivity() != null && intent.resolveActivity(getActivity().getPackageManager()) != null) {
                     startActivity(intent);
@@ -43,10 +61,31 @@ public class BranchMapFragment extends Fragment {
             });
         }
 
-        view.findViewById(R.id.fabMyLocation).setOnClickListener(v -> {
-             Toast.makeText(getContext(), "Đang lấy vị trí hiện tại...", Toast.LENGTH_SHORT).show();
-        });
+        View fabMyLocation = view.findViewById(R.id.fabMyLocation);
+        if (fabMyLocation != null) {
+            fabMyLocation.setOnClickListener(v -> {
+                Toast.makeText(getContext(), "Đang lấy vị trí hiện tại...", Toast.LENGTH_SHORT).show();
+                if (mMap != null) {
+                    LatLng loc = new LatLng(branchLat, branchLng);
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 17f));
+                }
+            });
+        }
 
         return view;
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Add a marker and move the camera
+        LatLng branchLocation = new LatLng(branchLat, branchLng);
+        mMap.addMarker(new MarkerOptions()
+                .position(branchLocation)
+                .title(branchName)
+                .snippet(branchAddress));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(branchLocation, 15f));
     }
 }
