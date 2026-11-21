@@ -2,6 +2,8 @@ package com.example.industrial_and_commercial_bank_of_tdtu.network;
 
 import androidx.annotation.NonNull;
 
+import com.example.industrial_and_commercial_bank_of_tdtu.BuildConfig;
+
 import java.io.IOException;
 
 import okhttp3.Interceptor;
@@ -29,7 +31,8 @@ public final class ApiClient {
             synchronized (ApiClient.class) {
                 if (retrofit == null) {
                     HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-                    logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+                    logging.redactHeader("Authorization");
+                    logging.setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BASIC : HttpLoggingInterceptor.Level.NONE);
 
                     Interceptor authInterceptor = new Interceptor() {
                         @NonNull

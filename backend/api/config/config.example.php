@@ -16,3 +16,8 @@ define('DB_PASS', 'YOUR_DATABASE_PASSWORD');
 // Tuy chon cho cac tinh nang mo rong (Stripe Test Mode & Gemini AI Chatbot)
 define('STRIPE_SECRET_KEY', 'sk_test_your_key_here');
 define('GEMINI_API_KEY', 'your_gemini_api_key_here');
+
+// Cau hinh bao mat URL, CORS & OTP
+define('APP_BASE_URL', 'https://phatg.id.vn/api');
+define('CORS_ALLOWED_ORIGIN', ''); // De trong cho Android app; chi dien domain cu the neu co Web FE
+define('DEMO_RETURN_OTP', false); // Dat false tren production khi da tich hop SMS/Email OTP

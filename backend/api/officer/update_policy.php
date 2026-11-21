@@ -16,8 +16,11 @@ $input = getRequestInput();
 $savingRate = isset($input['saving_interest_rate']) ? (float)$input['saving_interest_rate'] : -1.0;
 $threshold = isset($input['high_value_threshold']) ? (float)$input['high_value_threshold'] : 10000000.0;
 
-if ($savingRate < 0 || $savingRate > 50) {
+if (!is_finite($savingRate) || $savingRate < 0 || $savingRate > 50) {
     sendJson(false, 'Thong tin cap nhat lai suat khong hop le.', null, 400);
+}
+if (!is_finite($threshold) || $threshold < 100000 || $threshold > 100000000000) {
+    sendJson(false, 'Han muc eKYC khong hop le (tu 100.000 den 100.000.000.000 VND).', null, 400);
 }
 
 try {

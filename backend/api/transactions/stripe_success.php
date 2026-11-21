@@ -8,6 +8,9 @@
 require_once __DIR__ . '/../config/config.php';
 
 header('Content-Type: text/html; charset=utf-8');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Cache-Control: no-store, no-cache, must-revalidate, private');
 
 $sessionId = trim((string)($_GET['session_id'] ?? ''));
 if ($sessionId === '' || !preg_match('/^cs_[a-zA-Z0-9_]+$/', $sessionId)) {
@@ -33,8 +36,14 @@ if ($httpCode < 200 || $httpCode >= 300 || ($session['payment_status'] ?? '') !=
     exit;
 }
 
+if (strtolower((string)($session['currency'] ?? '')) !== 'vnd') {
+    http_response_code(400);
+    echo '<h3>Loại tiền tệ không hợp lệ.</h3>';
+    exit;
+}
+
 $userId = (int)($session['metadata']['user_id'] ?? 0);
-$amount = (float)($session['metadata']['amount'] ?? 0);
+$amount = (float)($session['amount_total'] ?? 0);
 
 if ($userId <= 0 || $amount <= 0) {
     http_response_code(400);
@@ -42,29 +51,35 @@ if ($userId <= 0 || $amount <= 0) {
     exit;
 }
 
-$dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-$pdo = new PDO($dsn, DB_USER, DB_PASS, [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-]);
-
 $txDesc = 'Nạp tiền qua Stripe (' . $sessionId . ')';
+$pdo = null;
 
 try {
+    $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
+    $pdo = new PDO($dsn, DB_USER, DB_PASS, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ]);
+
     $pdo->beginTransaction();
 
-    // Kiem tra chong cong tien 2 lan neu trang bi tai lai
-    $dupStmt = $pdo->prepare('SELECT id FROM transactions WHERE description = :desc AND status = "COMPLETED" LIMIT 1 FOR UPDATE');
-    $dupStmt->execute([':desc' => $txDesc]);
-    if (!$dupStmt->fetch()) {
-        $accStmt = $pdo->prepare(
-            'SELECT id, account_number FROM accounts WHERE user_id = :uid AND account_type = "CHECKING" LIMIT 1 FOR UPDATE'
-        );
-        $accStmt->execute([':uid' => $userId]);
-        $acc = $accStmt->fetch();
+    // Khoa dong tai khoan CHECKING truoc de tuan tu hoa moi request song song (tranh TOCTOU)
+    $accStmt = $pdo->prepare(
+        'SELECT id, account_number FROM accounts WHERE user_id = :uid AND account_type = "CHECKING" LIMIT 1 FOR UPDATE'
+    );
+    $accStmt->execute([':uid' => $userId]);
+    $acc = $accStmt->fetch();
 
-        if ($acc) {
+    if ($acc) {
+        $dupStmt = $pdo->prepare(
+            'SELECT id FROM transactions WHERE from_account_id = :acc_id AND description = :desc AND status = "COMPLETED" LIMIT 1'
+        );
+        $dupStmt->execute([
+            ':acc_id' => $acc['id'],
+            ':desc' => $txDesc,
+        ]);
+        if (!$dupStmt->fetch()) {
             $pdo->prepare('UPDATE accounts SET balance = balance + :amt WHERE id = :id')
                 ->execute([':amt' => $amount, ':id' => $acc['id']]);
 
@@ -81,7 +96,7 @@ try {
 
     $pdo->commit();
 } catch (Throwable $e) {
-    if ($pdo->inTransaction()) {
+    if ($pdo instanceof PDO && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
     http_response_code(500);

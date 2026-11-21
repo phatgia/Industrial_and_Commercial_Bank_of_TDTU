@@ -14,6 +14,7 @@ requireMethod('POST');
 $pdo = getDbConnection();
 $authUser = requireAuth($pdo);
 $userId = (int)$authUser['id'];
+enforceRateLimit('chat_ask', 'u:' . $userId, 20, 300);
 
 $input = getRequestInput();
 $question = trim((string)($input['message'] ?? ''));
@@ -86,12 +87,12 @@ $recentTx = [];
 if (!empty($accountIds)) {
     try {
         $txStmt = $pdo->prepare(
-            'SELECT t.tx_type, t.amount, t.description, t.created_at
+            'SELECT DISTINCT t.id, t.tx_type, t.amount, t.description, t.created_at
              FROM transactions t
              LEFT JOIN accounts acc_from ON t.from_account_id = acc_from.id
-             LEFT JOIN accounts acc_to ON t.to_account_id = acc_to.id
+             LEFT JOIN accounts acc_to ON t.to_account_number = acc_to.account_number AND t.to_bank_name = "ICBT Bank"
              WHERE acc_from.user_id = :uid1 OR acc_to.user_id = :uid2
-             ORDER BY t.created_at DESC
+             ORDER BY t.created_at DESC, t.id DESC
              LIMIT 5'
         );
         $txStmt->execute([':uid1' => $userId, ':uid2' => $userId]);

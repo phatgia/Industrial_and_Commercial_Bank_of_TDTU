@@ -74,6 +74,9 @@ public interface BankApiService {
     @POST("utilities/pay.php")
     Call<ApiResponse<BalanceUpdateData>> payUtilityBill(@Body PayBillRequest request);
 
+    @POST("utilities/topup.php")
+    Call<ApiResponse<BalanceUpdateData>> phoneTopUp(@Body Map<String, Object> request);
+
     @POST("ekyc/upload.php")
     Call<ApiResponse<EkycUploadData>> uploadEkyc(@Body EkycUploadRequest request);
 

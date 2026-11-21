@@ -17,6 +17,9 @@ if ($identifier === '' || $password === '') {
     sendJson(false, 'Vui long nhap day du so dien thoai/email va mat khau.', null, 400);
 }
 
+$clientIp = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+enforceRateLimit('login', $clientIp . ':' . strtolower($identifier), 10, 300);
+
 $pdo = getDbConnection();
 $stmt = $pdo->prepare(
     'SELECT id, full_name, email, phone, password_hash, role, ekyc_face_path, ekyc_verified, created_at
@@ -31,7 +34,9 @@ $stmt->execute([
 $user = $stmt->fetch();
 
 if (!$user) {
-    sendJson(false, 'Tai khoan khong ton tai.', null, 401);
+    // Thuc hien hash gia de giam chenh lech thoi gian phan hoi (chong do tai khoan)
+    password_verify($password, '$2y$10$abcdefghijklmnopqrstuv12345678901234567890123456789012');
+    sendJson(false, 'So dien thoai/email hoac mat khau khong chinh xac.', null, 401);
 }
 
 $storedHash = $user['password_hash'];
@@ -39,7 +44,7 @@ $isValid = password_verify($password, $storedHash)
     || hash_equals($storedHash, hash('sha256', $password));
 
 if (!$isValid) {
-    sendJson(false, 'Mat khau khong chinh xac.', null, 401);
+    sendJson(false, 'So dien thoai/email hoac mat khau khong chinh xac.', null, 401);
 }
 
 // Tu dong nang cap hash SHA-256 cu len bcrypt + random salt

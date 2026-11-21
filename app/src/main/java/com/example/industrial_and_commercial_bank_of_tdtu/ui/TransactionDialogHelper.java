@@ -5,9 +5,11 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.view.Window;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -30,6 +32,7 @@ import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferOtpData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransferRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiClient;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiErrorHelper;
+import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,7 +48,7 @@ public final class TransactionDialogHelper {
             "ICBT Bank", "Vietcombank", "BIDV", "Techcombank", "MB Bank", "ACB"
     };
     private static final String[] DEPOSIT_SOURCES = {
-            STRIPE_OPTION, "Vietcombank", "BIDV", "Techcombank", "MB Bank", "ACB"
+            STRIPE_OPTION
     };
 
     private TransactionDialogHelper() {
@@ -164,6 +167,7 @@ public final class TransactionDialogHelper {
                         positiveBtn.setEnabled(true);
                         ApiResponse<TransferConfirmData> body = response.body();
                         if (response.isSuccessful() && body != null && body.isSuccess()) {
+                            new SessionManager().invalidateDashboardCache();
                             otpDialog.dismiss();
                             parentDialog.dismiss();
                             Toast.makeText(context, "Chuyển tiền thành công!", Toast.LENGTH_SHORT).show();
@@ -302,6 +306,7 @@ public final class TransactionDialogHelper {
                 btnConfirm.setEnabled(true);
                 ApiResponse<BalanceUpdateData> body = response.body();
                 if (response.isSuccessful() && body != null && body.isSuccess()) {
+                    new SessionManager().invalidateDashboardCache();
                     dialog.dismiss();
                     Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show();
                     if (onSuccess != null) {
@@ -376,15 +381,27 @@ public final class TransactionDialogHelper {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setGeolocationEnabled(false);
+        settings.setSaveFormData(false);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
         final boolean[] handled = {false};
         webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                Uri uri = request != null ? request.getUrl() : null;
+                return uri == null || !"https".equalsIgnoreCase(uri.getScheme());
+            }
+
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 if (handled[0] || url == null) return;
                 if (data.getSuccessUrlPrefix() != null && url.startsWith(data.getSuccessUrlPrefix())) {
                     handled[0] = true;
+                    new SessionManager().invalidateDashboardCache();
                     webDialog.dismiss();
                     Toast.makeText(context, "Nạp tiền qua Stripe thành công!", Toast.LENGTH_SHORT).show();
                     if (onSuccess != null) {
@@ -396,6 +413,12 @@ public final class TransactionDialogHelper {
                     Toast.makeText(context, "Đã hủy thanh toán Stripe.", Toast.LENGTH_SHORT).show();
                 }
             }
+        });
+
+        webDialog.setOnDismissListener(d -> {
+            webView.stopLoading();
+            webView.clearCache(true);
+            webView.destroy();
         });
 
         webView.loadUrl(data.getCheckoutUrl());

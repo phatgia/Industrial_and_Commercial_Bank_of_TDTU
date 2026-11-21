@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.BalanceUpdateData;
-import com.example.industrial_and_commercial_bank_of_tdtu.model.DepositWithdrawRequest;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.TransactionResult;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiClient;
 import com.example.industrial_and_commercial_bank_of_tdtu.network.ApiErrorHelper;
@@ -27,7 +26,9 @@ import com.example.industrial_and_commercial_bank_of_tdtu.network.SessionManager
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -124,11 +125,12 @@ public class TopUpFragment extends Fragment {
         }
 
         double finalAmount = selectedValue * 0.98;
-        String desc = "Nạp tiền điện thoại " + phone;
 
         btnContinue.setEnabled(false);
-        DepositWithdrawRequest req = new DepositWithdrawRequest("WITHDRAW", finalAmount, desc);
-        ApiClient.getService().depositOrWithdraw(req).enqueue(new Callback<ApiResponse<BalanceUpdateData>>() {
+        Map<String, Object> req = new HashMap<>();
+        req.put("phone", phone);
+        req.put("denomination", (int) Math.round(selectedValue));
+        ApiClient.getService().phoneTopUp(req).enqueue(new Callback<ApiResponse<BalanceUpdateData>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<BalanceUpdateData>> call,
                                    @NonNull Response<ApiResponse<BalanceUpdateData>> response) {
@@ -137,6 +139,7 @@ public class TopUpFragment extends Fragment {
 
                 ApiResponse<BalanceUpdateData> body = response.body();
                 if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
+                    sessionManager.invalidateDashboardCache();
                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault());
                     String currentDate = sdf.format(new Date());
                     String transactionId = "FT" + body.getData().getTxId();

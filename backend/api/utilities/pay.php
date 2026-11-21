@@ -53,6 +53,14 @@ try {
     }
 
     $amount = (float)$bill['amount'];
+    $policy = $pdo->query('SELECT high_value_threshold FROM bank_policies ORDER BY id ASC LIMIT 1')->fetch();
+    $threshold = $policy ? (float)$policy['high_value_threshold'] : 10000000.0;
+    $requiredEkyc = ($amount >= $threshold) ? 1 : 0;
+    if ($requiredEkyc === 1 && !(bool)$authUser['ekyc_verified']) {
+        $pdo->rollBack();
+        sendJson(false, 'Thanh toan hoa don gia tri cao (>= ' . number_format($threshold) . ' VND) yeu cau xac thuc eKYC truoc.', null, 403);
+    }
+
     if ((float)$acc['balance'] < $amount) {
         $pdo->rollBack();
         sendJson(false, 'So du tai khoan khong du de thanh toan hoa don.', null, 400);
@@ -66,13 +74,14 @@ try {
     $desc = 'Thanh toán ' . $bill['provider_name'] . ' (' . $bill['bill_code'] . ')';
     $ins = $pdo->prepare(
         'INSERT INTO transactions (from_account_id, to_account_number, to_bank_name, tx_type, amount, status, required_ekyc, description)
-         VALUES (:acc_id, :bcode, :provider, "BILL_PAYMENT", :amt, "COMPLETED", 0, :desc)'
+         VALUES (:acc_id, :bcode, :provider, "BILL_PAYMENT", :amt, "COMPLETED", :ekyc, :desc)'
     );
     $ins->execute([
         ':acc_id' => $acc['id'],
         ':bcode' => $bill['bill_code'],
         ':provider' => $bill['provider_name'],
         ':amt' => $amount,
+        ':ekyc' => $requiredEkyc,
         ':desc' => $desc,
     ]);
 

@@ -9,10 +9,9 @@ require_once __DIR__ . '/config/db.php';
 requireMethod('GET');
 
 $pdo = getDbConnection();
-$version = $pdo->query('SELECT VERSION()')->fetchColumn();
+$pdo->query('SELECT 1')->fetchColumn();
 
 sendJson(true, 'API va MySQL hoat dong binh thuong.', [
-    'php_version' => PHP_VERSION,
-    'mysql_version' => $version,
+    'status' => 'ok',
     'server_time' => date('c'),
 ]);

@@ -1,4 +1,15 @@
 # Giu nguyen header Authorization: Bearer <token> khi chay PHP tren Apache/DirectAdmin
+Options -Indexes
+
+<FilesMatch "\.(zip|sql|md|bak|log)$|config\.example\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{HTTP:Authorization} .

@@ -51,7 +51,7 @@ public class BranchMapFragment extends Fragment implements OnMapReadyCallback {
         ImageButton btnDirections = view.findViewById(R.id.btnDirections);
         if (btnDirections != null) {
             btnDirections.setOnClickListener(v -> {
-                String geoUri = "http://maps.google.com/maps?daddr=" + branchLat + "," + branchLng;
+                String geoUri = "https://maps.google.com/maps?daddr=" + branchLat + "," + branchLng;
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(geoUri));
                 if (getActivity() != null && intent.resolveActivity(getActivity().getPackageManager()) != null) {
                     startActivity(intent);

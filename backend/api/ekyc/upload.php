@@ -37,8 +37,16 @@ if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
     sendJson(false, 'Khong tao duoc thu muc luu anh eKYC.', null, 500);
 }
 
+$uploadsHtaccess = dirname($uploadDir) . '/.htaccess';
+if (!file_exists($uploadsHtaccess)) {
+    @file_put_contents(
+        $uploadsHtaccess,
+        "Options -Indexes\n<IfModule mod_authz_core.c>\n    Require all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\n    Deny from all\n</IfModule>\n"
+    );
+}
+
 /**
- * Giai ma va luu 1 anh Base64 (<= 2MB) ra file JPEG trong uploads/ekyc/.
+ * Giai ma, kiem tra dinh dang anh that, tai ma hoa JPEG va luu file ngau nhien trong uploads/ekyc/.
  */
 function saveEkycJpeg(string $rawBase64, string $uploadDir, string $prefix, int $userId): string
 {
@@ -56,7 +64,28 @@ function saveEkycJpeg(string $rawBase64, string $uploadDir, string $prefix, int 
         sendJson(false, "Anh ($prefix) vuot qua dung luong toi da 2MB.", null, 400);
     }
 
-    $fileName = $prefix . '_user_' . $userId . '_' . time() . '.jpg';
+    $imgInfo = @getimagesizefromstring($binary);
+    $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+    if ($imgInfo === false || empty($imgInfo['mime']) || !in_array($imgInfo['mime'], $allowedMimes, true)) {
+        sendJson(false, "File ($prefix) khong phai anh JPEG/PNG/WEBP hop le.", null, 400);
+    }
+
+    if (function_exists('imagecreatefromstring') && function_exists('imagejpeg')) {
+        $gdImg = @imagecreatefromstring($binary);
+        if ($gdImg === false) {
+            sendJson(false, "Khong the doc noi dung anh ($prefix).", null, 400);
+        }
+        ob_start();
+        imagejpeg($gdImg, null, 85);
+        $reencoded = ob_get_clean();
+        unset($gdImg);
+        if ($reencoded === false || strlen($reencoded) < 100) {
+            sendJson(false, "Loi xu ly anh ($prefix).", null, 500);
+        }
+        $binary = $reencoded;
+    }
+
+    $fileName = $prefix . '_' . bin2hex(random_bytes(16)) . '.jpg';
     if (file_put_contents($uploadDir . '/' . $fileName, $binary) === false) {
         sendJson(false, "Khong the luu file anh ($prefix) len may chu.", null, 500);
     }

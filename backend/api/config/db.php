@@ -17,8 +17,16 @@ if (!file_exists($configFile)) {
 require_once $configFile;
 
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: no-referrer');
+header('Cache-Control: no-store, no-cache, must-revalidate, private');
+header('Pragma: no-cache');
+if (defined('CORS_ALLOWED_ORIGIN') && CORS_ALLOWED_ORIGIN !== '') {
+    header('Access-Control-Allow-Origin: ' . CORS_ALLOWED_ORIGIN);
+    header('Vary: Origin');
+}
+header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -118,7 +126,7 @@ function requireAuth(PDO $pdo): array
         'SELECT s.id AS session_id, u.id, u.full_name, u.email, u.phone, u.role, u.ekyc_face_path, u.ekyc_verified, u.created_at
          FROM user_sessions s
          INNER JOIN users u ON s.user_id = u.id
-         WHERE s.token_hash = :thash AND s.expires_at > NOW()
+         WHERE s.token_hash = :thash AND s.expires_at > NOW() AND s.created_at > DATE_SUB(NOW(), INTERVAL 12 HOUR)
          LIMIT 1'
     );
     $stmt->execute([':thash' => $tokenHash]);
@@ -148,4 +156,53 @@ function requireOfficer(PDO $pdo): array
         sendJson(false, 'Khong co quyen truy cap. Chi danh cho nhan vien ngan hang (OFFICER).', null, 403);
     }
     return $user;
+}
+
+/**
+ * Gioi han tan suat request theo cua so truot bang file lock (khong can sua DB).
+ */
+function enforceRateLimit(string $bucket, string $key, int $maxRequests, int $windowSeconds): void
+{
+    $dir = rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'icbt_rl';
+    if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+        return;
+    }
+
+    $file = $dir . DIRECTORY_SEPARATOR . hash('sha256', $bucket . '|' . $key) . '.json';
+    $fp = @fopen($file, 'c+');
+    if ($fp === false) {
+        return;
+    }
+
+    if (flock($fp, LOCK_EX)) {
+        rewind($fp);
+        $raw = stream_get_contents($fp);
+        $hits = ($raw !== false && $raw !== '') ? json_decode($raw, true) : [];
+        if (!is_array($hits)) {
+            $hits = [];
+        }
+
+        $now = time();
+        $cutoff = $now - $windowSeconds;
+        $filtered = [];
+        foreach ($hits as $ts) {
+            if (is_int($ts) && $ts > $cutoff) {
+                $filtered[] = $ts;
+            }
+        }
+
+        if (count($filtered) >= $maxRequests) {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+            sendJson(false, 'Qua nhieu yeu cau. Vui long thu lai sau it phut.', null, 429);
+        }
+
+        $filtered[] = $now;
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, json_encode($filtered));
+        fflush($fp);
+        flock($fp, LOCK_UN);
+    }
+    fclose($fp);
 }

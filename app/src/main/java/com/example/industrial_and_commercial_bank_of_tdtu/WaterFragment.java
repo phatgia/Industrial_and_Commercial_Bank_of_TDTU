@@ -170,6 +170,7 @@ public class WaterFragment extends Fragment {
 
                 ApiResponse<BalanceUpdateData> body = response.body();
                 if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
+                    sessionManager.invalidateDashboardCache();
                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault());
                     String currentDate = sdf.format(new Date());
                     String transactionId = "FT" + body.getData().getTxId();

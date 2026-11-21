@@ -22,18 +22,16 @@ if (!function_exists('curl_init')) {
 }
 
 $input = getRequestInput();
-$amount = (int)round((float)($input['amount'] ?? 0));
+$rawAmount = (float)($input['amount'] ?? 0);
+$amount = (int)round($rawAmount);
 
-if ($amount < 20000) {
-    sendJson(false, 'So tien nap qua Stripe toi thieu la 20.000 VND.', null, 400);
+if (!is_finite($rawAmount) || $amount < 20000 || $amount > 500000000) {
+    sendJson(false, 'So tien nap qua Stripe phai tu 20.000 den 500.000.000 VND.', null, 400);
 }
 
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? 'phatg.id.vn';
-$baseDir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/api/transactions/stripe_checkout.php'), '/\\');
-
-$successUrl = $scheme . '://' . $host . $baseDir . '/stripe_success.php?session_id={CHECKOUT_SESSION_ID}';
-$cancelUrl = $scheme . '://' . $host . $baseDir . '/stripe_cancel.php';
+$apiBase = (defined('APP_BASE_URL') && APP_BASE_URL !== '') ? rtrim(APP_BASE_URL, '/') : 'https://phatg.id.vn/api';
+$successUrl = $apiBase . '/transactions/stripe_success.php?session_id={CHECKOUT_SESSION_ID}';
+$cancelUrl = $apiBase . '/transactions/stripe_cancel.php';
 
 $postFields = http_build_query([
     'mode' => 'payment',
@@ -75,6 +73,6 @@ if ($httpCode < 200 || $httpCode >= 300 || empty($stripeData['url'])) {
 sendJson(true, 'Tao phien thanh toan Stripe thanh cong.', [
     'session_id' => $stripeData['id'],
     'checkout_url' => $stripeData['url'],
-    'success_url_prefix' => $scheme . '://' . $host . $baseDir . '/stripe_success.php',
+    'success_url_prefix' => $apiBase . '/transactions/stripe_success.php',
     'cancel_url_prefix' => $cancelUrl,
 ]);
