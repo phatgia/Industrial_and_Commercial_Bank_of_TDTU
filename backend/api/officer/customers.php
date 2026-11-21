@@ -22,13 +22,75 @@ if ($method === 'GET') {
     );
     $customers = $stmt->fetchAll();
 
+    $pendingEkycCount = 0;
     foreach ($customers as &$c) {
         $c['id'] = (int)$c['id'];
         $c['ekyc_verified'] = (bool)$c['ekyc_verified'];
         $c['checking_balance'] = (float)$c['checking_balance'];
+        if (!$c['ekyc_verified']) {
+            $pendingEkycCount++;
+        }
     }
 
-    sendJson(true, 'Lay danh sach khach hang thanh cong.', ['customers' => $customers]);
+    $txStatsStmt = $pdo->query(
+        'SELECT COUNT(*) AS today_count, COALESCE(SUM(amount), 0) AS today_volume
+         FROM transactions
+         WHERE DATE(created_at) = CURDATE()'
+    );
+    $txStats = $txStatsStmt->fetch();
+    $policy = $pdo->query('SELECT saving_interest_rate FROM bank_policies ORDER BY id ASC LIMIT 1')->fetch();
+
+    sendJson(true, 'Lay danh sach khach hang thanh cong.', [
+        'customers' => $customers,
+        'stats' => [
+            'total_customers' => count($customers),
+            'today_tx_count' => $txStats ? (int)$txStats['today_count'] : 0,
+            'today_tx_volume' => $txStats ? (float)$txStats['today_volume'] : 0.0,
+            'pending_ekyc_count' => $pendingEkycCount,
+            'saving_interest_rate' => $policy ? (float)$policy['saving_interest_rate'] : 5.50,
+        ],
+    ]);
+}
+
+if ($method === 'PUT' || ($method === 'POST' && ($inputAction = (getRequestInput()['action'] ?? '')) === 'update')) {
+    $input = getRequestInput();
+    $customerId = (int)($input['customer_id'] ?? 0);
+    $fullName = trim((string)($input['full_name'] ?? ''));
+    $email = trim((string)($input['email'] ?? ''));
+    $phone = trim((string)($input['phone'] ?? ''));
+
+    if ($customerId <= 0 || $fullName === '' || $email === '' || $phone === '') {
+        sendJson(false, 'Thieu thong tin cap nhat khach hang.', null, 400);
+    }
+
+    try {
+        $upd = $pdo->prepare(
+            'UPDATE users
+             SET full_name = :name, email = :email, phone = :phone
+             WHERE id = :id AND role = "CUSTOMER"'
+        );
+        $upd->execute([
+            ':name' => $fullName,
+            ':email' => $email,
+            ':phone' => $phone,
+            ':id' => $customerId,
+        ]);
+
+        if ($upd->rowCount() === 0) {
+            $chk = $pdo->prepare('SELECT id FROM users WHERE id = :id AND role = "CUSTOMER"');
+            $chk->execute([':id' => $customerId]);
+            if (!$chk->fetch()) {
+                sendJson(false, 'Khong tim thay khach hang.', null, 404);
+            }
+        }
+
+        sendJson(true, 'Cap nhat thong tin khach hang thanh cong.', [
+            'customer_id' => $customerId,
+            'updated_by_officer_id' => $officer['id'],
+        ]);
+    } catch (PDOException $e) {
+        sendJson(false, 'Email hoac so dien thoai da ton tai.', null, 409);
+    }
 }
 
 if ($method === 'POST') {

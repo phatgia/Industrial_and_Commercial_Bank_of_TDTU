@@ -55,18 +55,26 @@ $payload = json_encode([
     ],
 ], JSON_UNESCAPED_UNICODE);
 
-$url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode(GEMINI_API_KEY);
-$ch = curl_init($url);
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-    CURLOPT_POSTFIELDS => $payload,
-    CURLOPT_TIMEOUT => 20,
-]);
-$raw = curl_exec($ch);
-$code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
+$raw = false;
+$code = 0;
+foreach (['gemini-2.5-flash', 'gemini-2.0-flash'] as $modelName) {
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $modelName . ':generateContent?key=' . urlencode(GEMINI_API_KEY);
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_TIMEOUT => 20,
+    ]);
+    $raw = curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($raw !== false && $code >= 200 && $code < 300) {
+        break;
+    }
+}
 
 if ($raw === false || $code < 200 || $code >= 300) {
     sendJson(false, 'Khong doc duoc thong tin tu anh CCCD.', null, 502);

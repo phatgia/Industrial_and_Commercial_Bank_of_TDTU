@@ -86,6 +86,9 @@ public interface BankApiService {
     @POST("officer/customers.php")
     Call<ApiResponse<Map<String, Object>>> createCustomer(@Body CreateCustomerRequest request);
 
+    @POST("officer/customers.php")
+    Call<ApiResponse<Map<String, Object>>> updateCustomer(@Body Map<String, Object> request);
+
     @POST("officer/update_policy.php")
     Call<ApiResponse<Map<String, Object>>> updatePolicy(@Body UpdatePolicyRequest request);
 

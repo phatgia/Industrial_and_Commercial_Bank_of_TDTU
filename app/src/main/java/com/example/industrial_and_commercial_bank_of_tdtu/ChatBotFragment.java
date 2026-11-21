@@ -102,7 +102,8 @@ public class ChatBotFragment extends Fragment {
                 if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
                     addBotMessage(body.getData().getReply(), body.getData().getAction(), mainActivity);
                 } else {
-                    String msg = ApiErrorHelper.extractMessage(response, "Không nhận được phản hồi từ Nova AI.");
+                    String fallbackMsg = "Không nhận được phản hồi từ Nova AI (HTTP " + response.code() + ").";
+                    String msg = ApiErrorHelper.extractMessage(response, fallbackMsg);
                     Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
                 }
             }

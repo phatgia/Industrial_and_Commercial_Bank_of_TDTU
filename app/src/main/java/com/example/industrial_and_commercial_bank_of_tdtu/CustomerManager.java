@@ -160,30 +160,55 @@ public class CustomerManager extends AppCompatActivity {
             tvTitle.setText("Thêm khách hàng mới");
             btnLock.setVisibility(View.GONE);
         } else if (existing != null) {
-            tvTitle.setText("Thông tin khách hàng");
+            tvTitle.setText("Cập nhật khách hàng");
             btnLock.setVisibility(View.GONE);
             etName.setText(existing.getFullName());
             etPhone.setText(existing.getPhone());
             etEmail.setText(existing.getEmail());
-            etName.setEnabled(false);
-            etPhone.setEnabled(false);
-            etEmail.setEnabled(false);
-            btnSave.setText("Đóng");
+            btnSave.setText("Cập nhật");
         }
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
         btnSave.setOnClickListener(v -> {
-            if (!isNewCustomer) {
-                dialog.dismiss();
-                return;
-            }
-
             String name = etName.getText().toString().trim();
             String phone = etPhone.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
 
             if (name.isEmpty() || phone.isEmpty() || email.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đầy đủ Tên, SĐT và Email.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!isNewCustomer && existing != null) {
+                btnSave.setEnabled(false);
+                Map<String, Object> req = new java.util.HashMap<>();
+                req.put("action", "update");
+                req.put("customer_id", existing.getId());
+                req.put("full_name", name);
+                req.put("phone", phone);
+                req.put("email", email);
+                ApiClient.getService().updateCustomer(req).enqueue(new Callback<ApiResponse<Map<String, Object>>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Map<String, Object>>> call,
+                                           @NonNull Response<ApiResponse<Map<String, Object>>> response) {
+                        btnSave.setEnabled(true);
+                        ApiResponse<Map<String, Object>> body = response.body();
+                        if (response.isSuccessful() && body != null && body.isSuccess()) {
+                            Toast.makeText(CustomerManager.this, "Cập nhật khách hàng thành công!", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                            loadCustomers();
+                        } else {
+                            String msg = ApiErrorHelper.extractMessage(response, "Không thể cập nhật khách hàng.");
+                            Toast.makeText(CustomerManager.this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Map<String, Object>>> call, @NonNull Throwable t) {
+                        btnSave.setEnabled(true);
+                        Toast.makeText(CustomerManager.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
                 return;
             }
 

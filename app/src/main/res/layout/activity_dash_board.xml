@@ -177,10 +177,11 @@
                     app:layout_constraintTop_toBottomOf="@+id/tvTitleCard1" />
 
                 <TextView
+                    android:id="@+id/tvCustomerCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="248"
+                    android:text="0"
                     android:textColor="#1E293B"
                     android:textSize="28sp"
                     android:textStyle="bold"
@@ -188,9 +189,10 @@
                     app:layout_constraintTop_toBottomOf="@+id/iconCard1" />
 
                 <TextView
+                    android:id="@+id/tvCustomerBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="↗ 12,4%"
+                    android:text="Hệ thống"
                     android:textColor="#059669"
                     android:textSize="10sp"
                     android:textStyle="bold"
@@ -241,10 +243,11 @@
                     app:layout_constraintTop_toBottomOf="@+id/tvTitleCard2" />
 
                 <TextView
+                    android:id="@+id/tvTodayTxCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="1.842"
+                    android:text="0"
                     android:textColor="#1E293B"
                     android:textSize="28sp"
                     android:textStyle="bold"
@@ -252,9 +255,10 @@
                     app:layout_constraintTop_toBottomOf="@+id/iconCard2" />
 
                 <TextView
+                    android:id="@+id/tvTodayTxVolume"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="68,2 tỷ"
+                    android:text="0 đ"
                     android:textColor="#059669"
                     android:textSize="10sp"
                     android:textStyle="bold"
@@ -305,10 +309,11 @@
                     app:layout_constraintTop_toBottomOf="@+id/tvTitleCard3" />
 
                 <TextView
+                    android:id="@+id/tvPendingEkycCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="03"
+                    android:text="00"
                     android:textColor="#1E293B"
                     android:textSize="28sp"
                     android:textStyle="bold"
@@ -316,6 +321,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/iconCard3" />
 
                 <TextView
+                    android:id="@+id/tvPendingStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Ưu tiên"
@@ -378,6 +384,7 @@
                 <!-- List of KYC (Hardcoded for UI as per image) -->
                 <!-- Item 1 -->
                 <LinearLayout
+                    android:id="@+id/rowKyc1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -385,6 +392,7 @@
                     android:paddingVertical="12dp">
 
                     <TextView
+                        android:id="@+id/tvKycAvatar1"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="@drawable/bg_icon_green"
@@ -402,16 +410,18 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvKycName1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Nguyễn Hoàng"
+                            android:text="Đang tải..."
                             android:textColor="#1E293B"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvKycCode1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="KH-204821"
+                            android:text=""
                             android:textColor="#64748B"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -424,12 +434,14 @@
                 </LinearLayout>
 
                 <View
+                    android:id="@+id/kycDivider"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#F1F5F9" />
 
                 <!-- Item 2 -->
                 <LinearLayout
+                    android:id="@+id/rowKyc2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
@@ -437,6 +449,7 @@
                     android:paddingVertical="12dp">
 
                     <TextView
+                        android:id="@+id/tvKycAvatar2"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="@drawable/bg_icon_purple"
@@ -454,16 +467,18 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvKycName2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Trần Ngọc Mai"
+                            android:text="Đang tải..."
                             android:textColor="#1E293B"
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/tvKycCode2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="KH-204822"
+                            android:text=""
                             android:textColor="#64748B"
                             android:textSize="11sp" />
                     </LinearLayout>
