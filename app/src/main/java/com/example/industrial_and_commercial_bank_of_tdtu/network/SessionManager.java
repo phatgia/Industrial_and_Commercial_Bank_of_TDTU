@@ -4,8 +4,12 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.example.industrial_and_commercial_bank_of_tdtu.model.AccountsData;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.ApiResponse;
+import com.example.industrial_and_commercial_bank_of_tdtu.model.TransactionItem;
 import com.example.industrial_and_commercial_bank_of_tdtu.model.User;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -20,6 +24,9 @@ public class SessionManager {
     private static volatile String authToken;
     private static volatile String checkingAccountNumber;
     private static volatile boolean ekycVerifiedOverride;
+    private static volatile AccountsData cachedAccountsData;
+    private static volatile List<TransactionItem> cachedRecentTransactions;
+    private static volatile long lastDashboardFetchTimeMs;
 
     public SessionManager() {
     }
@@ -32,6 +39,9 @@ public class SessionManager {
         currentUser = user;
         authToken = token;
         ekycVerifiedOverride = user != null && user.isEkycVerified();
+        cachedAccountsData = null;
+        cachedRecentTransactions = null;
+        lastDashboardFetchTimeMs = 0L;
     }
 
     public void saveUser(User user) {
@@ -86,11 +96,42 @@ public class SessionManager {
         return getUserId() > 0 && authToken != null && !authToken.isEmpty();
     }
 
+    public AccountsData getCachedAccountsData() {
+        return cachedAccountsData;
+    }
+
+    public void saveDashboardAccounts(AccountsData data) {
+        cachedAccountsData = data;
+        lastDashboardFetchTimeMs = System.currentTimeMillis();
+    }
+
+    public List<TransactionItem> getCachedRecentTransactions() {
+        return cachedRecentTransactions;
+    }
+
+    public void saveRecentTransactions(List<TransactionItem> items) {
+        cachedRecentTransactions = items;
+        lastDashboardFetchTimeMs = System.currentTimeMillis();
+    }
+
+    public boolean isDashboardCacheFresh(long ttlMs) {
+        return cachedAccountsData != null
+                && cachedRecentTransactions != null
+                && (System.currentTimeMillis() - lastDashboardFetchTimeMs) < ttlMs;
+    }
+
+    public void invalidateDashboardCache() {
+        lastDashboardFetchTimeMs = 0L;
+    }
+
     public void clear() {
         currentUser = null;
         authToken = null;
         checkingAccountNumber = null;
         ekycVerifiedOverride = false;
+        cachedAccountsData = null;
+        cachedRecentTransactions = null;
+        lastDashboardFetchTimeMs = 0L;
     }
 
     /**

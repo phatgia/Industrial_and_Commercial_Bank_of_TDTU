@@ -91,14 +91,14 @@ public class HomeFragment extends Fragment {
         btnTranferOut.setOnClickListener(v -> TransactionDialogHelper.showTransferDialog(
                 requireContext(),
                 formattedBalance,
-                this::loadDashboardData
+                () -> loadDashboardData(true)
         ));
 
         btnTranferIn = view.findViewById(R.id.btnTranferIn);
         btnTranferIn.setOnClickListener(v -> TransactionDialogHelper.showDepositDialog(
                 requireContext(),
                 formattedBalance,
-                this::loadDashboardData
+                () -> loadDashboardData(true)
         ));
 
         btnUtility = view.findViewById(R.id.btnBill);
@@ -132,13 +132,23 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        loadDashboardData();
+        if (sessionManager.getCachedAccountsData() != null) {
+            renderAccounts(sessionManager.getCachedAccountsData());
+        }
+        if (sessionManager.getCachedRecentTransactions() != null) {
+            renderTransactions(sessionManager.getCachedRecentTransactions());
+        }
+
+        loadDashboardData(false);
 
         return view;
     }
 
-    private void loadDashboardData() {
+    private void loadDashboardData(boolean forceRefresh) {
         if (!sessionManager.isLoggedIn()) return;
+        if (!forceRefresh && sessionManager.isDashboardCacheFresh(15_000L)) {
+            return;
+        }
 
         ApiClient.getService().getAccounts().enqueue(new Callback<ApiResponse<AccountsData>>() {
             @Override
@@ -146,27 +156,17 @@ public class HomeFragment extends Fragment {
                 if (!isAdded()) return;
                 ApiResponse<AccountsData> body = response.body();
                 if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
-                    List<BankAccount> accounts = body.getData().getAccounts();
-                    double checkingOrTotal = 0;
-                    if (accounts != null) {
-                        for (BankAccount acc : accounts) {
-                            if ("CHECKING".equalsIgnoreCase(acc.getAccountType())) {
-                                checkingOrTotal = acc.getBalance();
-                                sessionManager.setCheckingAccountNumber(acc.getAccountNumber());
-                                break;
-                            }
-                        }
-                    }
-                    NumberFormat vnd = NumberFormat.getInstance(new Locale("vi", "VN"));
-                    formattedBalance = vnd.format(Math.round(checkingOrTotal)) + " đ";
-                    txtBalance.setText(isBalanceVisible ? formattedBalance : "•••••••• đ");
+                    sessionManager.saveDashboardAccounts(body.getData());
+                    renderAccounts(body.getData());
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<AccountsData>> call, @NonNull Throwable t) {
                 if (!isAdded()) return;
-                Toast.makeText(requireContext(), "Không tải được số dư: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                if (sessionManager.getCachedAccountsData() == null) {
+                    Toast.makeText(requireContext(), "Không tải được số dư: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -178,7 +178,8 @@ public class HomeFragment extends Fragment {
                 if (response.isSuccessful() && body != null && body.isSuccess() && body.getData() != null) {
                     List<TransactionItem> items = body.getData().getTransactions();
                     if (items != null) {
-                        lvTransactions.setAdapter(new TransactionAdapter(requireContext(), items));
+                        sessionManager.saveRecentTransactions(items);
+                        renderTransactions(items);
                     }
                 }
             }
@@ -186,8 +187,31 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<TransactionsData>> call, @NonNull Throwable t) {
                 if (!isAdded()) return;
-                Toast.makeText(requireContext(), "Không tải được lịch sử giao dịch.", Toast.LENGTH_SHORT).show();
+                if (sessionManager.getCachedRecentTransactions() == null) {
+                    Toast.makeText(requireContext(), "Không tải được lịch sử giao dịch.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+
+    private void renderAccounts(AccountsData data) {
+        List<BankAccount> accounts = data.getAccounts();
+        double checkingOrTotal = 0;
+        if (accounts != null) {
+            for (BankAccount acc : accounts) {
+                if ("CHECKING".equalsIgnoreCase(acc.getAccountType())) {
+                    checkingOrTotal = acc.getBalance();
+                    sessionManager.setCheckingAccountNumber(acc.getAccountNumber());
+                    break;
+                }
+            }
+        }
+        NumberFormat vnd = NumberFormat.getInstance(new Locale("vi", "VN"));
+        formattedBalance = vnd.format(Math.round(checkingOrTotal)) + " đ";
+        txtBalance.setText(isBalanceVisible ? formattedBalance : "•••••••• đ");
+    }
+
+    private void renderTransactions(List<TransactionItem> items) {
+        lvTransactions.setAdapter(new TransactionAdapter(requireContext(), items));
     }
 }
